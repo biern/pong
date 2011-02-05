@@ -46,14 +46,14 @@ YUI.add("connectionhandler", function (Y) {
       playerMove: function(moveData){
 	
       },
-      // callbacks
-      onDebugMessage: function(evt, msg){
+      // Handling events
+      _onDebugMessage: function(evt, msg){
 	this._logServerDebugMsg(msg);
       },
-      onServerMessage: function(evt, msg){
+      _onServerMessage: function(evt, msg){
 	this.log(msg, "info");
       },
-      onPingResponse: function(evt, from){
+      _onPingResponse: function(evt, from){
 	this.fire("server:ping", (new Date).getTime() - from);
         evt.halt();
       },
@@ -82,7 +82,7 @@ YUI.add("connectionhandler", function (Y) {
 	    prefix: prefix
 	  });
 	  // binding to existing methods
-	  var handler = this['on' + type[0].toUpperCase() + type.slice(1)];
+	  var handler = this['_on' + type[0].toUpperCase() + type.slice(1)];
 	  if(typeof(handler) != "undefined"){
 	    this.on(prefix + type, handler);
 	  }
