@@ -4,8 +4,12 @@ YUI.add("connectionhandler", function (Y) {
     "ConnectionHandler", Y.Base, [],
     {
       _socket: null,
+      _options: {
+	pingInterval: 1000
+      },
       // Interface
-      initializer: function(){
+      initializer: function(options){
+	this._updateOptions(options);
 	this._initEvents();
       },
       connect: function(url){
@@ -57,7 +61,31 @@ YUI.add("connectionhandler", function (Y) {
 	this.fire("server:ping", (new Date).getTime() - from);
         evt.halt();
       },
+      _afterConnectedChange: function(evt){
+	// Connected
+	if(evt.newVal){
+	  this._startPinger(evt.newVal);
+	// Disconnected
+	} else {
+
+	}
+      },
       // internals
+      _updateOptions: function(options){
+	for(var key in options){
+	  this._options[key] = options[key];
+	}
+      },
+      _startPinger: function(){
+	var that = this;
+	var pinger = function(){
+	  if(that.get("connected")){
+	    that._makeRequest("pingRequest", (new Date).getTime());
+	    setTimeout(pinger, that._options.pingInterval);
+	  }
+	};
+	pinger();
+      },
       _initEvents: function(options){
 	// Publishing WebSocket events
 	var eventNames = this.get("eventNames");
@@ -88,7 +116,7 @@ YUI.add("connectionhandler", function (Y) {
 	  }
 	}
 	// Binding other events
-	this.after("connectedChange", "_afterConnectedChange");
+	this.after("connectedChange", this._afterConnectedChange);
       },
       _unhandledServerResponse: function(response){
 	this.log('unhandled response "' + response.type + '"', "warning");
