@@ -31,7 +31,6 @@ YUI.add("client", function (Y) {
       },
       // internals
       _initConnectionHandler: function(){
-	var that = this;
 	var ch = this._connectionHandler = new Y.Pong._ConnectionHandler();
 	ch.addTarget(this);
       },
