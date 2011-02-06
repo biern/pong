@@ -1,6 +1,6 @@
 YUI.add("connectionhandler", function (Y) {
   var prefix = "server:";
-  Y.namespace("Pong")._ConnectionHandler = Y.Base.create(
+  Y.namespace("Pong").ConnectionHandler = Y.Base.create(
     "ConnectionHandler", Y.Base, [],
     {
       _socket: null,

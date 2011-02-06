@@ -5,6 +5,7 @@ YUI.add("client", function (Y) {
       _connectionHandler: null,
       // Interface
       initializer: function(options){
+	this._updateOptions(options);
 	this._initConnectionHandler();
       },
       connect: function(url){
@@ -31,7 +32,7 @@ YUI.add("client", function (Y) {
       },
       // internals
       _initConnectionHandler: function(){
-	var ch = this._connectionHandler = new Y.Pong._ConnectionHandler();
+	var ch = this._connectionHandler = new Y.Pong.ConnectionHandler();
 	ch.addTarget(this);
       },
       _commandNotImplemented: function(cmd, data){
