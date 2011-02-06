@@ -35,7 +35,9 @@ YUI.add("connectionhandler", function (Y) {
 	};
       },
       disconnect: function(){
-	
+	if(this._socket){
+	  this._socket.close();
+	}
       },
       authenticate: function(authData){
 	this._makeRequest("authRequest", authData);
@@ -67,7 +69,7 @@ YUI.add("connectionhandler", function (Y) {
 	  this._startPinger(evt.newVal);
 	// Disconnected
 	} else {
-
+	  
 	}
       },
       // internals
