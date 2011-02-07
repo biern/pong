@@ -1,15 +1,16 @@
 YUI.add("connectionhandler", function (Y) {
   var prefix = "server:";
-  Y.namespace("Pong").ConnectionHandler = Y.Base.create(
+  var ConnectionHandler = Y.namespace("Pong").ConnectionHandler = Y.Base.create(
     "ConnectionHandler", Y.Base, [],
     {
       _socket: null,
+      // Default options
       _options: {
 	pingInterval: 1000
       },
       // Interface
       initializer: function(options){
-	this._updateOptions(options);
+	this.initOptions(this._options, options);
 	this._initEvents();
       },
       connect: function(url){
@@ -73,11 +74,6 @@ YUI.add("connectionhandler", function (Y) {
 	}
       },
       // internals
-      _updateOptions: function(options){
-	for(var key in options){
-	  this._options[key] = options[key];
-	}
-      },
       _startPinger: function(){
 	var that = this;
 	var pinger = function(){
@@ -187,5 +183,6 @@ YUI.add("connectionhandler", function (Y) {
       }
     }
   );
+  Y.augment(ConnectionHandler, Y.Pong.utils.ObjectWithOptions());
   Y.log("module loaded", "debug", "connectionhandler");
 }, "0", { requires:[] });

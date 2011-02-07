@@ -1,11 +1,17 @@
 YUI.add("client", function (Y) {
-  Y.namespace("Pong").Client = Y.Base.create(
+  var Client = Y.namespace("Pong").Client = Y.Base.create(
     "Client", Y.Base, [],
     {
+      // Shorthands (these are stored in _options anyway)
       _connectionHandler: null,
+      // Default options
+      _options: {
+	connectionHandler: null
+      },
       // Interface
       initializer: function(options){
-	this._updateOptions(options);
+	this._initEvents();
+	this.initOptions(this._options, options);
 	this._initConnectionHandler();
       },
       connect: function(url){
@@ -30,7 +36,14 @@ YUI.add("client", function (Y) {
 	}
 	Y.log(msg, type, "client");
       },
+      // Events
+      _afterOptionsUpdate: function(evt, options, updated){
+	this._connectionHandler = options.connectionHandler;
+      },
       // internals
+      _initEvents: function(){
+	this.after("optionsUpdate", this._afterOptionsUpdate);
+      },
       _initConnectionHandler: function(){
 	var ch = this._connectionHandler = new Y.Pong.ConnectionHandler();
 	ch.addTarget(this);
@@ -49,5 +62,6 @@ YUI.add("client", function (Y) {
       }
     }
   );
+  Y.augment(Client, Y.Pong.utils.ObjectWithOptions());
   Y.log("module loaded", "debug", "client");
-}, "0", { requires: ["connectionhandler"] });
+}, "0", { requires: ["connectionhandler", "utils"] });
