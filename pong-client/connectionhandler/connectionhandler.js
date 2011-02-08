@@ -32,7 +32,10 @@ YUI.add("connectionhandler", function (Y) {
 	  that.fire(prefix + "connectionError");
 	};
 	socket.onmessage = function(evt){
-	  that._handleResponse(that._getResponse(evt.data));
+	  var response = that._getResponse(evt.data);
+	  if(response != null){
+	    that._handleResponse(response);
+	  }
 	};
       },
       disconnect: function(){
@@ -143,7 +146,7 @@ YUI.add("connectionhandler", function (Y) {
 	} else {
 	  // TODO preparsing
 	  this._logResponse(response);
-	  this.fire(prefix + response.type, response.data);
+	  this.fire(prefix + response.type, {}, response.data);
 	}
       },
       _logServerDebugMsg: function(msg){
@@ -164,7 +167,7 @@ YUI.add("connectionhandler", function (Y) {
 	},
 	allResponses: {
 	  value: ['authRequest', 'authSuccess', 'authFailed', 'pingResponse',
-		  'debugMessage', 'serverMessage'],
+		  'debugMessage', 'serverMessage', 'snapshot', 'gameStart'],
 	  readOnly: true
 	},
 	eventNames: {

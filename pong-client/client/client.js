@@ -4,15 +4,19 @@ YUI.add("client", function (Y) {
     {
       // Shorthands (these are stored in _options anyway)
       _connectionHandler: null,
+      _simulation: null,
       // Default options
       _options: {
-	connectionHandler: null
+	connectionHandler: null,
+	simulation: null
       },
       // Interface
       initializer: function(options){
-	this._initEvents();
+	this.after("optionsUpdate", this._afterOptionsUpdate);
 	this.initOptions(this._options, options);
 	this._initConnectionHandler();
+	this._initSimulation();
+	this._initEvents();
       },
       connect: function(url){
 	this._connectionHandler.connect(url);
@@ -39,14 +43,32 @@ YUI.add("client", function (Y) {
       // Events
       _afterOptionsUpdate: function(evt, options, updated){
 	this._connectionHandler = options.connectionHandler;
+	this._simulation = options.simulation;
       },
       // internals
       _initEvents: function(){
-	this.after("optionsUpdate", this._afterOptionsUpdate);
+	var that = this;
+	this.on("server:snapshot", function(evt, snapshot){
+	  that._simulation.addSnapshot(snapshot);
+	});
+	this.on("server:gameStart", function(evt, count){
+	  that.log("START");
+	  that._simulation.start();
+	});
+	this.on("simulation:step", function(evt, snapshot){
+	  var ball = snapshot.getBalls()[0];
+	  if(ball){
+	    that.log(ball.get('x'));
+	  }
+	});
       },
       _initConnectionHandler: function(){
 	var ch = this._connectionHandler = new Y.Pong.ConnectionHandler();
 	ch.addTarget(this);
+      },
+      _initSimulation: function(){
+	var sim = this._simulation =  new Y.Pong.Simulation();
+	sim.addTarget(this);
       },
       _commandNotImplemented: function(cmd, data){
 	
@@ -64,4 +86,4 @@ YUI.add("client", function (Y) {
   );
   Y.augment(Client, Y.Pong.utils.ObjectWithOptions());
   Y.log("module loaded", "debug", "client");
-}, "0", { requires: ["connectionhandler", "utils"] });
+}, "0", { requires: ["connectionhandler", "utils", "simulation"] });
