@@ -5,18 +5,11 @@ YUI.add("client", function (Y) {
       // Shorthands (these are stored in _options anyway)
       _connectionHandler: null,
       _simulation: null,
-      // Default options
-      _options: {
-	connectionHandler: null,
-	simulation: null
-      },
       // Interface
-      initializer: function(options){
-	this.after("optionsUpdate", this._afterOptionsUpdate);
-	this.initOptions(this._options, options);
+      initializer: function(){
+	this._initEvents();
 	this._initConnectionHandler();
 	this._initSimulation();
-	this._initEvents();
       },
       connect: function(url){
 	this._connectionHandler.connect(url);
@@ -41,13 +34,10 @@ YUI.add("client", function (Y) {
 	Y.log(msg, type, "client");
       },
       // Events
-      _afterOptionsUpdate: function(evt, options, updated){
-	this._connectionHandler = options.connectionHandler;
-	this._simulation = options.simulation;
-      },
       // internals
       _initEvents: function(){
 	var that = this;
+	// Binding other events - glueing everything together
 	this.on("server:snapshot", function(evt, snapshot){
 	  that._simulation.addSnapshot(snapshot);
 	});
@@ -67,7 +57,7 @@ YUI.add("client", function (Y) {
 	ch.addTarget(this);
       },
       _initSimulation: function(){
-	var sim = this._simulation =  new Y.Pong.Simulation();
+	var sim = this._simulation = new Y.Pong.Simulation();
 	sim.addTarget(this);
       },
       _commandNotImplemented: function(cmd, data){
@@ -84,6 +74,5 @@ YUI.add("client", function (Y) {
       }
     }
   );
-  Y.augment(Client, Y.Pong.utils.ObjectWithOptions());
   Y.log("module loaded", "debug", "client");
-}, "0", { requires: ["connectionhandler", "utils", "simulation"] });
+}, "0", { requires: ["connectionhandler", "simulation"] });
