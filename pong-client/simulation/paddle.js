@@ -10,6 +10,10 @@ YUI.add("paddle", function (Y) {
     },
     {
       ATTRS: {
+	setAttrs: {
+	  value: ['x', 'y', 'w', 'h', 'speed', 'moving'],
+	  readonly: true
+	},
 	x: {
 	  value: 0
 	},
@@ -20,6 +24,9 @@ YUI.add("paddle", function (Y) {
 	  value: 0
 	},
 	h: {
+	  value: 0
+	},
+	speed: {
 	  value: 0
 	},
 	moving: {

@@ -100,7 +100,7 @@ YUI.add("snapshot", function (Y) {
 	}
       },
       _updatePaddle: function(paddle, toUpdate){
-	var attrs = ['x', 'y', 'w', 'h', 'direction', 'ownerID'];
+	var attrs = paddle.get("setAttrs");
 	for(var i in attrs){
 	  paddle.set(attrs[i], toUpdate.get(attrs[i]));
 	}
