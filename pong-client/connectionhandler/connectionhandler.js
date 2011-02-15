@@ -167,7 +167,8 @@ YUI.add("connectionhandler", function (Y) {
 	},
 	allResponses: {
 	  value: ['authRequest', 'authSuccess', 'authFailed', 'pingResponse',
-		  'debugMessage', 'serverMessage', 'snapshot', 'gameStart'],
+		  'debugMessage', 'serverMessage', 'snapshot', 'gameStart',
+		  'simulationData'],
 	  readOnly: true
 	},
 	eventNames: {
@@ -188,4 +189,4 @@ YUI.add("connectionhandler", function (Y) {
   );
   Y.augment(ConnectionHandler, Y.Pong.utils.ObjectWithOptions());
   Y.log("module loaded", "debug", "connectionhandler");
-}, "0", { requires:[] });
+}, "0", { requires: ['utils'] });

@@ -1,15 +1,17 @@
 YUI.add("client", function (Y) {
   var Client = Y.namespace("Pong").Client = Y.Base.create(
-    "Client", Y.Base, [],
+    "Client", Y.Widget, [],
     {
       // Shorthands (these are stored in _options anyway)
       _connectionHandler: null,
       _simulation: null,
+      _renderer: null,
       // Interface
       initializer: function(){
 	this._initEvents();
 	this._initConnectionHandler();
 	this._initSimulation();
+	this._initRenderer();
       },
       connect: function(url){
 	this._connectionHandler.connect(url);
@@ -33,7 +35,12 @@ YUI.add("client", function (Y) {
 	}
 	Y.log(msg, type, "client");
       },
-      // Events
+      renderUI: function(){
+	this._renderer.set("contentBox", this.get("contentBox"));
+      },
+      bindUI: function(){
+	
+      },
       // internals
       _initEvents: function(){
 	var that = this;
@@ -45,11 +52,16 @@ YUI.add("client", function (Y) {
 	  that.log("START");
 	  that._simulation.start();
 	});
+	this.on("server:connectionClosed", function(evt){
+	  that._simulation.stop();
+	  that.log("stopping simulation");
+	});
 	this.on("simulation:step", function(evt, snapshot){
-	  var ball = snapshot.getBalls()[0];
-	  if(ball){
-	    that.log(ball.get('x'));
-	  }
+	  this._renderer.renderFrame(snapshot);
+	});
+	this.on("server:simulationData", function(evt, data){
+	  this._simulation.set("simulationData", data);
+	  this._renderer.set("simulationData", data);
 	});
       },
       _initConnectionHandler: function(){
@@ -59,6 +71,10 @@ YUI.add("client", function (Y) {
       _initSimulation: function(){
 	var sim = this._simulation = new Y.Pong.Simulation();
 	sim.addTarget(this);
+      },
+      _initRenderer: function(){
+	var r = this._renderer = new Y.Pong.Renderer();
+	r.addTarget(this);
       },
       _commandNotImplemented: function(cmd, data){
 	
@@ -75,4 +91,4 @@ YUI.add("client", function (Y) {
     }
   );
   Y.log("module loaded", "debug", "client");
-}, "0", { requires: ["connectionhandler", "simulation"] });
+}, "0", { requires: ["connectionhandler", "simulation", "renderer"] });

@@ -10,6 +10,7 @@ YUI.add("simulation", function (Y) {
       },
       _stopSimulator: false,
       _snapshot: null,
+      _predicted: null,
       // Interface
       initializer: function(options){
 	this._initEvents();
@@ -30,7 +31,7 @@ YUI.add("simulation", function (Y) {
 	    that._stopSimulator = false;
 	    that._set("running", false);
 	  } else {
-	    setTimeout(simulator, parseInt(1000 / that.get("simulationData.fps")));
+	    setTimeout(simulator, parseInt(that.get("simulationData.interval")));
 	  }
 	};
 	simulator();
@@ -50,7 +51,8 @@ YUI.add("simulation", function (Y) {
 	  snapshotData,
 	  this._options.PaddleCls,
 	  this._options.BallCls);
-
+	this._snapshot.set("isNew", true);
+	this._predicted = null;
       },
       log: function(msg, type){
 	if(! type){
@@ -60,20 +62,37 @@ YUI.add("simulation", function (Y) {
       },
       // internals
       _simulate: function(){
+	// TODO: Trochę to namieszane
 	var snapshot = this._getLastSnapshot();
-	var timeDelta = ((new Date).getTime() - snapshot.get('timestamp')) * 2;
-	var frameDelta = parseInt(timeDelta / this._fps);
+	var timeDelta = ((new Date).getTime() - snapshot.get("timestamp")) +
+	  snapshot.get("ping") * 2;
+	var frameDelta = parseInt(timeDelta / this.get("simulationData.interval"));
+	frameDelta = frameDelta ? frameDelta : 0;
+	// this.log("pre delta: " + frameDelta);
 	this.fire(prefix + "step", {},
-		  this._getSnapshotAfter(snapshot, frames));
+		  this._getSnapshotAfter(snapshot, frameDelta));
       },
       _getLastSnapshot: function(){
 	return this._snapshot;
       },
       _getSnapshotAfter: function(snapshot, frames){
-	var predicted = snapshot.copy();
+	var predicted;
+	if(this._predicted &&
+	   this._predicted.get('frameDelta') <= frames &&
+	   !snapshot.get("isNew")){
+	  predicted = this._predicted;
+	  frames -= this._predicted.get('framesDelta');
+	  this.log("new delta: " + frames);
+	} else {
+	  snapshot.set("isNew", false);
+	  predicted = snapshot.copy();
+	  predicted.set('framesDelta', 0);
+	}
 	for(var i = 0; i < frames; i++){
 	  this._simulationCycle(predicted);
 	}
+	predicted.set('framesDelta', predicted.get('framesDelta') + frames);
+	this._predicted = predicted;
 	return predicted;
       },
       _simulationCycle: function(snapshot){
@@ -85,17 +104,17 @@ YUI.add("simulation", function (Y) {
 	var paddles = snapshot.getPaddles();
 	for(var key in paddles){
 	  var paddle = paddles[key];
-	  switch(paddle.moving){
+	  switch(paddle.get('moving')){
 	  case "up":
-	    paddle.y -= paddle.speed;
-	    if (paddle.y < 0){
-	      paddle.y = 0;
+	    paddle.set('y', paddle.get('y') - paddle.get('speed'));
+	    if (paddle.get('y') < 0){
+	      paddle.get('y') = 0;
 	    }
 	    break;
 	  case "down":
-	    paddle.y += paddle.speed;
-	    if (paddle.y + paddle.h > hMax){
-	      paddle.y = hMax - paddle.h;
+	    paddle.set('y', paddle.get('y') + paddle.speed);
+	    if (paddle.get('y') + paddle.get('h') > hMax){
+	      paddle.set('y', hMax - paddle.get('h'));
 	    }
 	    break;
 	  }
@@ -106,12 +125,14 @@ YUI.add("simulation", function (Y) {
 	var balls = snapshot.getBalls();
 	for (var key in balls){
 	  var ball = balls[key];
-	  ball.x += ball.speed * Math.sin(ball.dir);
-	  ball.y -= ball.speed * Math.cos(ball.dir);
-	  if (ball.y + 2*ball.r >= hMax){
-	    ball.dir = Math.PI - ball.dir;
-	  } else if (ball.y <= 0){
-	    ball.dir = Math.PI - ball.dir;	  
+	  ball.set('x', ball.get('x') +
+		   ball.get('speed') * Math.sin(ball.get('dir')));
+	  ball.set('y', ball.get('y') -
+		   ball.get('speed') * Math.cos(ball.get('dir')));
+	  if (ball.get('y') + 2*ball.get('r') >= hMax){
+	    ball.set('dir', Math.PI - ball.get('dir'));
+	  } else if (ball.get('y') <= 0){
+	    ball.set('dir', Math.PI - ball.get('dir'));	  
 	  }
 	}
       },
@@ -126,6 +147,12 @@ YUI.add("simulation", function (Y) {
     },
     {
       ATTRS: {
+	PaddleCls: {
+	  value: Y.Pong.Paddle
+	},
+	BallCls: {
+	  value: Y.Pong.Ball
+	},
 	simulationData: {
 	  value: {
 	    fps: 30,
@@ -142,6 +169,9 @@ YUI.add("simulation", function (Y) {
 	paused: {
 	  value: false,
 	  readonly: true
+	},
+	fps: {
+	  value: 33
 	}
       }
     }

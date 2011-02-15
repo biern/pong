@@ -3,23 +3,35 @@ YUI.add("ball", function (Y) {
     Y.Base.create(
     "Ball", Y.Base, [],
     {
+      
       // Interface
       initializer: function(data){
-	this.set('x', data.x);
-	this.set('y', data.y);
-	this.set('moving', data.moving);
+	// for(var i in this.get("setAttrs")){
+	//   var name = this.get("setAttrs")[i];
+	//   this.set(name, data[name]);
+	// }
       }
     },
     {
       ATTRS: {
+	setAttrs: {
+	  value: ['x', 'y', 'r', 'dir', 'speed'],
+	  readonly: true
+	},
 	x: {
 	  value: 0
 	},
 	y: {
 	  value: 0
 	},
-	moving: {
-	  value: false
+	r: {
+	  value: 0
+	},
+	dir: {
+	  value: 0
+	},
+	speed: {
+	  value: 0
 	}
       }
     }

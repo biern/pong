@@ -12,6 +12,7 @@ YUI.add("snapshot", function (Y) {
 	this._PaddleCls = PaddleCls;
 	this._BallCls = BallCls;
 	this._set("timestamp", snapshotData.timestamp);
+	this.set("ping", (new Date).getTime() - snapshotData.timestamp);
 	this._balls = [];
 	for(var i in snapshotData.balls){
 	  this._balls.push(new BallCls(snapshotData.balls[i]));
@@ -23,6 +24,7 @@ YUI.add("snapshot", function (Y) {
       },
       update: function(snapshot){
 	// Update all objects data with data from given snapshot
+	// TODO: Remove that and provide only setData. 
 	var addNew,
 	  objTypes = ["ball", "paddle"],
 	  newObjects = {
@@ -92,13 +94,13 @@ YUI.add("snapshot", function (Y) {
 	return null;
       },
       _updateBall: function(ball, toUpdate){
-	var attrs = ['x', 'y', 'dir'];
+	var attrs = ball.get("setAttrs");
 	for(var i in attrs){
 	  ball.set(attrs[i], toUpdate.get(attrs[i]));
 	}
       },
       _updatePaddle: function(paddle, toUpdate){
-	var attrs = ['x', 'y', 'moving', 'ownerID'];
+	var attrs = ['x', 'y', 'w', 'h', 'direction', 'ownerID'];
 	for(var i in attrs){
 	  paddle.set(attrs[i], toUpdate.get(attrs[i]));
 	}
@@ -106,7 +108,19 @@ YUI.add("snapshot", function (Y) {
     }, {
       ATTRS: {
 	timestamp: {
+	  value: null,
 	  readonly: true
+	},
+	// Frame delta from base snapshot
+	frameDelta: {
+	  value: 0
+	},
+	ping: {
+	  value: null
+	},
+	// Set to true on 
+	isNew: {
+	  value: false
 	}
       }
     });

@@ -4,10 +4,8 @@ YUI.add("paddle", function (Y) {
     "Paddle", Y.Base, [],
     {
       // Interface
-      initializer: function(data){
-	this.set('x', data.x);
-	this.set('y', data.y);
-	this.set('direction', data.direction);
+      initializer: function(){
+	
       }
     },
     {
@@ -18,7 +16,13 @@ YUI.add("paddle", function (Y) {
 	y: {
 	  value: 0
 	},
-	direction: {
+	w: {
+	  value: 0
+	},
+	h: {
+	  value: 0
+	},
+	moving: {
 	  value: 0
 	}
       }
