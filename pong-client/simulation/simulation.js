@@ -171,6 +171,5 @@ YUI.add("simulation", function (Y) {
       }
     }
   );
-  Y.augment(Simulation, Y.Pong.utils.ObjectWithOptions());
   Y.log("module loaded", "debug", "simulation");
 }, "0", { requires: ["utils", "snapshot", "paddle", "ball"] });

@@ -185,6 +185,5 @@ YUI.add("connectionhandler", function (Y) {
       }
     }
   );
-  Y.augment(ConnectionHandler, Y.Pong.utils.ObjectWithOptions());
   Y.log("module loaded", "debug", "connectionhandler");
 }, "0", { requires: ['utils'] });
