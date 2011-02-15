@@ -4,24 +4,19 @@ YUI.add("simulation", function (Y) {
     Y.Base.create(
     "Simulation", Y.Base, [],
     {
-      _options: {
-	PaddleCls: Y.Pong.Paddle,
-	BallCls: Y.Pong.Ball
-      },
       _stopSimulator: false,
       _snapshot: null,
       _predicted: null,
       // Interface
-      initializer: function(options){
+      initializer: function(){
 	this._initEvents();
-	this.initOptions(this._options, options);
       },
       start: function(){
 	var that = this;
 	this._snapshot = new Y.Pong.Snapshot(
 	  { timestamp: (new Date).getTime() },
-	  this._options.PaddleCls,
-	  this._options.BallCls);
+	  this.get('PaddleCls'),
+	  this.get('BallCls'));
 	var simulator = function(){
 	  that.set("running", true);
 	  if(! that.get("paused")){
@@ -49,8 +44,8 @@ YUI.add("simulation", function (Y) {
 	this._snapshot = new Y.Pong.Snapshot();
 	this._snapshot.setData(
 	  snapshotData,
-	  this._options.PaddleCls,
-	  this._options.BallCls);
+	  this.get('PaddleCls'),
+	  this.get('BallCls'));
 	this._snapshot.set("isNew", true);
 	this._predicted = null;
       },

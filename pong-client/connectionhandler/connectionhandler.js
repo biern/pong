@@ -4,13 +4,8 @@ YUI.add("connectionhandler", function (Y) {
     "ConnectionHandler", Y.Base, [],
     {
       _socket: null,
-      // Default options
-      _options: {
-	pingInterval: 1000
-      },
       // Interface
-      initializer: function(options){
-	this.initOptions(this._options, options);
+      initializer: function(){
 	this._initEvents();
       },
       connect: function(url){
@@ -82,7 +77,7 @@ YUI.add("connectionhandler", function (Y) {
 	var pinger = function(){
 	  if(that.get("connected")){
 	    that._makeRequest("pingRequest", (new Date).getTime());
-	    setTimeout(pinger, that._options.pingInterval);
+	    setTimeout(pinger, that.get('pingInterval'));
 	  }
 	};
 	pinger();
@@ -183,6 +178,9 @@ YUI.add("connectionhandler", function (Y) {
 	authenticated: {
 	  value: false,
 	  readOnly: true
+	},
+	pingInterval: {
+	  value: 1000
 	}
       }
     }
