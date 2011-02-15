@@ -38,13 +38,11 @@ YUI.add("renderer", function (Y) {
 	  balls = snapshot.getBalls(),
 	  paddles = snapshot.getPaddles();
 	this._currentSnapshot = snapshot;
-	// ctx.clearRect(0, 0, 400, 400);
-	this.log(Y.Lang.dump(this._toClear[0]));
 	while (this._toClear.length){
 	  var coords = this._toClear.shift();
 	  ctx.fillStyle = "red";
 	  ctx.clearRect(coords[0], coords[1], coords[2], coords[3]);
-	  ctx.fillRect(coords[0], coords[1], coords[2], coords[3]);
+	  // ctx.fillRect(coords[0], coords[1], coords[2], coords[3]);
 	}
 	for (var i in balls){
 	  this._drawBall(balls[i]);
