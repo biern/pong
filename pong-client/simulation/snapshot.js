@@ -117,8 +117,9 @@ YUI.add("snapshot", function (Y) {
 	},
 	// Snapshot from wich this one is derived
 	origin: {
-	  value: null,
-	  clone: Attribute.CLONE.SHALLOW
+	  value: null
+	  // TODO: how to shallow clone this field?
+	  // clone: Y.Attribute.CLONE.SHALLOW
 	},
 	ping: {
 	  value: null
