@@ -115,6 +115,11 @@ YUI.add("snapshot", function (Y) {
 	frameDelta: {
 	  value: 0
 	},
+	// Snapshot from wich this one is derived
+	origin: {
+	  value: null,
+	  clone: Attribute.CLONE.SHALLOW
+	},
 	ping: {
 	  value: null
 	},

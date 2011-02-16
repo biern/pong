@@ -57,7 +57,7 @@ YUI.add("simulation", function (Y) {
       },
       // internals
       _simulate: function(){
-	// TODO: Trochę to namieszane
+	// TODO: Cleanup simulation process
 	var snapshot = this._getLastSnapshot();
 	var timeDelta = ((new Date).getTime() - snapshot.get("timestamp")) +
 	  snapshot.get("ping") * 2;
@@ -77,10 +77,11 @@ YUI.add("simulation", function (Y) {
 	   !snapshot.get("isNew")){
 	  predicted = this._predicted;
 	  frames -= this._predicted.get('framesDelta');
-	  this.log("new delta: " + frames);
+	  // this.log("new delta: " + frames);
 	} else {
 	  snapshot.set("isNew", false);
 	  predicted = snapshot.copy();
+	  predicted.set('origin', snapshot);
 	  predicted.set('framesDelta', 0);
 	}
 	for(var i = 0; i < frames; i++){
