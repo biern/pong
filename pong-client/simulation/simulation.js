@@ -58,7 +58,7 @@ YUI.add("simulation", function (Y) {
 	  this.get('BallCls'));
 	// Create a copy of a recieved snapshot that is used for temporary
 	// client side simulation
-	var simulated = this._simulated = new Y.Pong.Snapshot();
+	var simulated = new Y.Pong.Snapshot();
 	simulated.setData(
 	  snapshotData,
 	  this.get('PaddleCls'),
@@ -70,7 +70,7 @@ YUI.add("simulation", function (Y) {
 	this._simulateSnapshotFor(simulated, framesDelta);
 	simulated.set("timestamp", (new Date).getTime());
 	simulated.set('originFramesDelta', framesDelta);
-
+	this._simulated = simulated;
       },
       log: function(msg, type){
 	if(! type){
