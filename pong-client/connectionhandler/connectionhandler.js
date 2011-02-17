@@ -163,7 +163,7 @@ YUI.add("connectionhandler", function (Y) {
 	allResponses: {
 	  value: ['authRequest', 'authSuccess', 'authFailed', 'pingResponse',
 		  'debugMessage', 'serverMessage', 'snapshot', 'gameStart',
-		  'simulationData', 'playerData'],
+		  'gameSimulationData', 'playerData'],
 	  readOnly: true
 	},
 	eventNames: {
