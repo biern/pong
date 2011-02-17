@@ -49,7 +49,7 @@ YUI.add("connectionhandler", function (Y) {
 	
       },
       playerMove: function(moveData){
-	
+	this._makeRequest("playerMove", moveData);
       },
       // Handling events
       _onDebugMessage: function(evt, msg){
@@ -163,7 +163,7 @@ YUI.add("connectionhandler", function (Y) {
 	allResponses: {
 	  value: ['authRequest', 'authSuccess', 'authFailed', 'pingResponse',
 		  'debugMessage', 'serverMessage', 'snapshot', 'gameStart',
-		  'simulationData'],
+		  'simulationData', 'playerData'],
 	  readOnly: true
 	},
 	eventNames: {

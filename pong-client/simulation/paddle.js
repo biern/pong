@@ -11,7 +11,7 @@ YUI.add("paddle", function (Y) {
     {
       ATTRS: {
 	setAttrs: {
-	  value: ['x', 'y', 'w', 'h', 'speed', 'moving'],
+	  value: ['x', 'y', 'w', 'h', 'speed', 'moving', 'playerID'],
 	  readonly: true
 	},
 	x: {
@@ -30,6 +30,9 @@ YUI.add("paddle", function (Y) {
 	  value: 0
 	},
 	moving: {
+	  value: 0
+	},
+	playerID: {
 	  value: 0
 	}
       }

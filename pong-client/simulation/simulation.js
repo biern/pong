@@ -4,7 +4,7 @@ YUI.add("simulation", function (Y) {
     Y.Base.create(
     "Simulation", Y.Base, [],
     {
-      _stopSimulator: false,
+      _simulationTimer: null,
       _snapshot: null,
       _simulated: null,
       // Interface
@@ -12,33 +12,39 @@ YUI.add("simulation", function (Y) {
 	this._initEvents();
       },
       start: function(){
-	var that = this;
-	this._snapshot = new Y.Pong.Snapshot(
-	  { timestamp: (new Date).getTime() },
-	  this.get('PaddleCls'),
-	  this.get('BallCls'));
+	this.addSnapshot({ timestamp: (new Date).getTime() });
+	this.set("running", true);
 	var simulator = function(){
-	  that.set("running", true);
-	  if(! that.get("paused")){
-	    that._simulate();
+	  if(! this.get("paused")){
+	    this._simulate();
 	  }
-	  if(that._stopSimulator){
-	    that._stopSimulator = false;
-	    that._set("running", false);
-	  } else {
-	    setTimeout(simulator, parseInt(that.get("simulationData.interval")));
-	  }
+	  // For the reasons unknown calling Y.later every time simulator is
+	  // called is much faster / more accurate than setting it to periodic
+	  this._simulationTimer = Y.later(
+	    parseInt(this.get("simulationData.interval")),
+	    this,
+	    simulator,
+	    []
+	  );
 	};
-	simulator();
+	simulator.apply(this);
       },
       stop: function(){
-	this._stopSimulator = true;
+	this._simulationTimer.cancel();
+	this.set("running", false);
       },
       pause: function(){
 	
       },
       resume: function(){
 
+      },
+      playerMove: function(moveData){
+	Y.each(this._simulated.getPaddles(), function(paddle){
+	  if(paddle.get("playerID") === this.get("player.id")){
+	    paddle.set("moving", moveData);
+	  }
+	}, this);
       },
       addSnapshot: function(snapshotData){
 	this._snapshot = new Y.Pong.Snapshot();
@@ -66,6 +72,8 @@ YUI.add("simulation", function (Y) {
 	  return;
 	}
 	var simulated = this._simulated,
+	  // Travel time from server->client is assumed the same
+	  // as the other way round
 	  timeDelta = ((new Date).getTime() - simulated.get("timestamp")),
 	  framesDelta = parseInt(timeDelta / this.get("simulationData.interval"));
 	this._simulateSnapshotFor(simulated, framesDelta);
@@ -93,7 +101,7 @@ YUI.add("simulation", function (Y) {
 	  case "up":
 	    paddle.set('y', paddle.get('y') - paddle.get('speed'));
 	    if (paddle.get('y') < 0){
-	      paddle.get('y') = 0;
+	      paddle.set('y', 0);
 	    }
 	    break;
 	  case "down":
@@ -154,6 +162,11 @@ YUI.add("simulation", function (Y) {
 	paused: {
 	  value: false,
 	  readonly: true
+	},
+	player: {
+	  value: {
+	    id: -1
+	  }
 	}
       }
     }

@@ -27,7 +27,9 @@ YUI.add("client", function (Y) {
 	
       },
       playerMove: function(moveData){
-	
+	// Move data should be one of strings: "up", "down", "stop"
+	this._connectionHandler.playerMove(moveData);
+	this._simulation.playerMove(moveData);
       },
       log: function(msg, type){
 	if(! type){
@@ -62,6 +64,9 @@ YUI.add("client", function (Y) {
 	this.on("server:simulationData", function(evt, data){
 	  this._simulation.set("simulationData", data);
 	  this._renderer.set("simulationData", data);
+	});
+	this.on("server:playerData", function(evt, playerData){
+	  this._simulation.set("player", playerData);
 	});
       },
       _initConnectionHandler: function(){
