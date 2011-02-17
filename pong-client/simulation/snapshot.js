@@ -1,10 +1,10 @@
 YUI.add("snapshot", function (Y) {
   var Snapshot = Y.namespace("Pong").Snapshot =
     Y.Base.create("Snapshot", Y.Base, [], {
-      _balls: [],
-      _paddles: [],
       _PaddleCls: null,
       _BallCls: null,
+      _balls: null,
+      _paddles: null,
       initializer: function(){
 
       },
@@ -12,7 +12,9 @@ YUI.add("snapshot", function (Y) {
 	this._PaddleCls = PaddleCls;
 	this._BallCls = BallCls;
 	this._set("timestamp", snapshotData.timestamp);
-	this.set("ping", (new Date).getTime() - snapshotData.timestamp);
+	// TODO: Ping should be calculated more precisely -
+	// round trip time, not time *2
+	this.set("ping", ((new Date).getTime() - snapshotData.timestamp) * 2);
 	this._balls = [];
 	for(var i in snapshotData.balls){
 	  this._balls.push(new BallCls(snapshotData.balls[i]));
@@ -65,9 +67,6 @@ YUI.add("snapshot", function (Y) {
 	  this['_' + type] = updatedObjs;
 	}
 	this._set("timestamp", snapshot.get("timestamp"));
-      },
-      copy: function(){
-	return Y.clone(this);
       },
       getPaddles: function(){
 	return this._paddles;

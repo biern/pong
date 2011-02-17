@@ -6,7 +6,7 @@ YUI.add("simulation", function (Y) {
     {
       _stopSimulator: false,
       _snapshot: null,
-      _predicted: null,
+      _simulated: null,
       // Interface
       initializer: function(){
 	this._initEvents();
@@ -46,8 +46,12 @@ YUI.add("simulation", function (Y) {
 	  snapshotData,
 	  this.get('PaddleCls'),
 	  this.get('BallCls'));
-	this._snapshot.set("isNew", true);
-	this._predicted = null;
+	this._simulated = new Y.Pong.Snapshot();
+	this._simulated.setData(
+	  snapshotData,
+	  this.get('PaddleCls'),
+	  this.get('BallCls'));
+	this._simulated.set('origin', this._snapshot);
       },
       log: function(msg, type){
 	if(! type){
@@ -57,39 +61,24 @@ YUI.add("simulation", function (Y) {
       },
       // internals
       _simulate: function(){
-	// TODO: Cleanup simulation process
-	var snapshot = this._getLastSnapshot();
-	var timeDelta = ((new Date).getTime() - snapshot.get("timestamp")) +
-	  snapshot.get("ping") * 2;
-	var frameDelta = parseInt(timeDelta / this.get("simulationData.interval"));
-	frameDelta = frameDelta ? frameDelta : 0;
-	// this.log("pre delta: " + frameDelta);
-	this.fire(prefix + "step", {},
-		  this._getSnapshotAfter(snapshot, frameDelta));
-      },
-      _getLastSnapshot: function(){
-	return this._snapshot;
-      },
-      _getSnapshotAfter: function(snapshot, frames){
-	var predicted;
-	if(this._predicted &&
-	   this._predicted.get('frameDelta') <= frames &&
-	   !snapshot.get("isNew")){
-	  predicted = this._predicted;
-	  frames -= this._predicted.get('framesDelta');
-	  // this.log("new delta: " + frames);
-	} else {
-	  snapshot.set("isNew", false);
-	  predicted = snapshot.copy();
-	  predicted.set('origin', snapshot);
-	  predicted.set('framesDelta', 0);
+	// Quit if no temporary snapshot is out there
+	if(! this._simulated){
+	  return;
 	}
+	var simulated = this._simulated,
+	  timeDelta = ((new Date).getTime() - simulated.get("timestamp")),
+	  framesDelta = parseInt(timeDelta / this.get("simulationData.interval"));
+	this._simulateSnapshotFor(simulated, framesDelta);
+	simulated.set("timestamp", (new Date).getTime());
+	simulated.set('originFramesDelta',
+		      simulated.get('originFramesDelta') + framesDelta);
+	this.fire(prefix + "step", {}, simulated);
+      },
+      _simulateSnapshotFor: function(snapshot, frames){
 	for(var i = 0; i < frames; i++){
-	  this._simulationCycle(predicted);
+	  this._simulationCycle(snapshot);
 	}
-	predicted.set('framesDelta', predicted.get('framesDelta') + frames);
-	this._predicted = predicted;
-	return predicted;
+	return snapshot;
       },
       _simulationCycle: function(snapshot){
 	this._simulatePaddles(snapshot);
@@ -151,7 +140,7 @@ YUI.add("simulation", function (Y) {
 	},
 	simulationData: {
 	  value: {
-	    fps: 30,
+	    interval: 1000 / 66,
 	    board: {
 	      'h': 800,
 	      'w': 600
