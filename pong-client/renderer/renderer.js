@@ -44,6 +44,25 @@ YUI.add("renderer", function (Y) {
 	  ctx.clearRect(coords[0], coords[1], coords[2], coords[3]);
 	  // ctx.fillRect(coords[0], coords[1], coords[2], coords[3]);
 	}
+	if(this.get("debug")){
+	  if(snapshot.get("origin")){
+	    this._renderOriginFrame(snapshot.get("origin"));
+	  }
+	}
+	ctx.fillStyle = this.get("color");
+	for (var i in balls){
+	  this._drawBall(balls[i]);
+	}
+	for (var i in paddles){
+	  this._drawPaddle(paddles[i]);
+	}
+      },
+      _renderOriginFrame: function(snapshot){
+	var ctx = this._context,
+	  balls = snapshot.getBalls(),
+	  paddles = snapshot.getPaddles();
+	this._currentSnapshot = snapshot;
+	ctx.fillStyle = this.get("originColor");
 	for (var i in balls){
 	  this._drawBall(balls[i]);
 	}
@@ -56,7 +75,6 @@ YUI.add("renderer", function (Y) {
 	  x = ball.get('x'),
 	  y = ball.get('y'),
 	  e = this._clearExtra;
-	this._context.fillStyle = this.get("color");
 	this._context.fillRect(x, y, r*2, r*2);
 	this._toClear.push([x - e, y - e, r*2 + 2*e, r*2 + 2*e]);
       },
@@ -66,7 +84,6 @@ YUI.add("renderer", function (Y) {
 	  y = paddle.get('y'),
 	  w = paddle.get('w'),
 	  h = paddle.get('h');
-	this._context.fillStyle = this.get("color");
 	this._context.fillRect(x, y, w, h);
 	this._toClear.push([x - e, y - e, w + 2*e, h + 2*e]);
       },
@@ -93,6 +110,12 @@ YUI.add("renderer", function (Y) {
 	},
 	color: {
 	  value: "white"
+	},
+	originColor: {
+	  value: "blue"
+	},
+	debug: {
+	  value: true
 	}
 	// board: {
 	//   value: {
