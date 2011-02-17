@@ -6,6 +6,8 @@ YUI.add("client", function (Y) {
       _connectionHandler: null,
       _simulation: null,
       _renderer: null,
+      _controlsStack: [],
+      _lastKey: null,
       // Interface
       initializer: function(){
 	this._initEvents();
@@ -51,8 +53,12 @@ YUI.add("client", function (Y) {
 	  that._simulation.addSnapshot(snapshot);
 	});
 	this.on("server:gameStart", function(evt, count){
-	  that.log("START");
-	  that._simulation.start();
+	  if(count == 1){
+	    that.log("START");
+	    that._simulation.start();
+	  } else {
+	    this.log("Start in: " + count, "info");
+	  }
 	});
 	this.on("server:connectionClosed", function(evt){
 	  that._simulation.stop();
@@ -61,13 +67,15 @@ YUI.add("client", function (Y) {
 	this.on("simulation:step", function(evt, snapshot){
 	  this._renderer.renderFrame(snapshot);
 	});
-	this.on("server:simulationData", function(evt, data){
+	this.on("server:gameSimulationData", function(evt, data){
 	  this._simulation.set("simulationData", data);
 	  this._renderer.set("simulationData", data);
 	});
 	this.on("server:playerData", function(evt, playerData){
 	  this._simulation.set("player", playerData);
 	});
+	Y.one(document).on("keydown", this._onDocumentKeyDown, this);
+	Y.one(document).on("keyup", this._onDocumentKeyUp, this);
       },
       _initConnectionHandler: function(){
 	var ch = this._connectionHandler = new Y.Pong.ConnectionHandler();
@@ -81,6 +89,40 @@ YUI.add("client", function (Y) {
 	var r = this._renderer = new Y.Pong.Renderer();
 	r.addTarget(this);
       },
+      _onDocumentKeyDown: function (evt) {
+	if(this._lastKey == evt.keyCode){
+	  return;
+	}
+	this._lastKey = evt.keyCode;
+	Y.each(this.get("controls.movementKeys"), function(dir){
+	  if(this.get("controls.bindings")[dir] == evt.keyCode){
+	    this._controlsStack.unshift(dir);
+	    this.playerMove(dir);
+	  }
+	}, this);
+	// this.log("on down " + this._controlsStack.toString());
+      },
+      _onDocumentKeyUp: function(evt){
+	this._lastKey = null;
+	var move;
+	Y.each(this.get("controls.movementKeys"), function(dir, i){
+	  if(this.get("controls.bindings")[dir] == evt.keyCode){
+	    move = dir;
+	  }
+	}, this);
+	for(var i in this._controlsStack){
+	  if(this._controlsStack[i] == move){
+	    this._controlsStack.splice(i);
+	    break;
+	  }
+	}
+	// this.log("on up: " + this._controlsStack.toString());
+	if(this._controlsStack.length){
+	  this.playerMove(this._controlsStack[0]);
+	} else {
+	  this.playerMove("stop");
+	}
+      },
       _commandNotImplemented: function(cmd, data){
 	
       }
@@ -91,6 +133,15 @@ YUI.add("client", function (Y) {
           validator: Y.Lang.isBoolean,
 	  value: false,
 	  readOnly: true
+	},
+	controls: {
+	  value: {
+	    movementKeys: ["up", "down"],
+	    bindings: {
+	      up: 87,
+	      down: 83
+	    }
+	  }
 	}
       }
     }
