@@ -47,22 +47,21 @@ YUI.add("client", function (Y) {
       },
       // internals
       _initEvents: function(){
-	var that = this;
 	// Binding other events - glueing everything together
 	this.on("server:snapshot", function(evt, snapshot){
-	  that._simulation.addSnapshot(snapshot);
+	  this._simulation.addSnapshot(snapshot);
 	});
 	this.on("server:gameStart", function(evt, count){
 	  if(count == 1){
-	    that.log("START");
-	    that._simulation.start();
+	    this.log("START");
+	    this._simulation.start();
 	  } else {
 	    this.log("Start in: " + count, "info");
 	  }
 	});
 	this.on("server:connectionClosed", function(evt){
-	  that._simulation.stop();
-	  that.log("stopping simulation");
+	  this._simulation.stop();
+	  this.log("stopping simulation");
 	});
 	this.on("simulation:step", function(evt, snapshot){
 	  this._renderer.renderFrame(snapshot);
@@ -104,6 +103,7 @@ YUI.add("client", function (Y) {
       },
       _onDocumentKeyUp: function(evt){
 	this._lastKey = null;
+	// Checking stack of pressed keys, removing this one if present
 	var move;
 	Y.each(this.get("controls.movementKeys"), function(dir, i){
 	  if(this.get("controls.bindings")[dir] == evt.keyCode){
