@@ -12,9 +12,6 @@ YUI.add("snapshot", function (Y) {
 	this._PaddleCls = PaddleCls;
 	this._BallCls = BallCls;
 	this._set("timestamp", snapshotData.timestamp);
-	// TODO: Ping should be calculated more precisely -
-	// round trip time, not time *2
-	this.set("ping", ((new Date).getTime() - snapshotData.timestamp) * 2);
 	this._balls = [];
 	for(var i in snapshotData.balls){
 	  this._balls.push(new BallCls(snapshotData.balls[i]));
@@ -117,15 +114,6 @@ YUI.add("snapshot", function (Y) {
 	// Snapshot from wich this one is derived
 	origin: {
 	  value: null
-	  // TODO: how to shallow clone this field?
-	  // clone: Y.Attribute.CLONE.SHALLOW
-	},
-	ping: {
-	  value: null
-	},
-	// Set to true on 
-	isNew: {
-	  value: false
 	}
       }
     });

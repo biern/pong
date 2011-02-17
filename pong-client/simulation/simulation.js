@@ -154,9 +154,6 @@ YUI.add("simulation", function (Y) {
 	paused: {
 	  value: false,
 	  readonly: true
-	},
-	fps: {
-	  value: 33
 	}
       }
     }
