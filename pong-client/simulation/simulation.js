@@ -43,11 +43,10 @@ YUI.add("simulation", function (Y) {
 
       },
       playerMove: function(moveData){
-	Y.each(this._simulated.getPaddles(), function(paddle){
-	  if(paddle.get("playerID") === this.get("player.id")){
-	    paddle.set("moving", moveData);
-	  }
-	}, this);
+	var paddle = this.getPlayerPaddle();
+	if(paddle){
+	  paddle.set("moving", moveData);
+	}
       },
       addSnapshot: function(snapshotData){
 	// Save recieved snapshot
@@ -64,6 +63,14 @@ YUI.add("simulation", function (Y) {
 	  this.get('PaddleCls'),
 	  this.get('BallCls'));
 	simulated.set('origin', snapshot);
+	// Set paddle movement to that requested now, not one recieved from server
+	if(this._simulated){
+	  var paddle = simulated.getPlayerPaddle(this.get("player"));
+	  var oldPaddle = this._simulated.getPlayerPaddle(this.get("player"));
+	  if(paddle && oldPaddle){
+	    paddle.set("moving", oldPaddle.get("moving"));
+	  }
+	}
 	// Simulate snapshot forward to match server - client time delay
 	var timeDelta = ((new Date).getTime() - simulated.get("timestamp")),
 	  framesDelta = parseInt(timeDelta / this.get("simulationData.interval"));
@@ -71,6 +78,15 @@ YUI.add("simulation", function (Y) {
 	simulated.set("timestamp", (new Date).getTime());
 	simulated.set('originFramesDelta', framesDelta);
 	this._simulated = simulated;
+      },
+      getPlayerPaddle: function(){
+	var paddles = this._simulated.getPaddles();
+	for(var i = 0; i < paddles.length; i++){
+	  if(paddles[i].get("playerID") == this.get("player.id")){
+	    return paddles[i];
+	  }
+	}
+	return null;
       },
       log: function(msg, type){
 	if(! type){
