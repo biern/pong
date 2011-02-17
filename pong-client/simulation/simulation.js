@@ -12,6 +12,7 @@ YUI.add("simulation", function (Y) {
 	this._initEvents();
       },
       start: function(){
+	this.stop();
 	this.addSnapshot({ timestamp: (new Date).getTime() });
 	this.set("running", true);
 	var simulator = function(){
@@ -30,7 +31,9 @@ YUI.add("simulation", function (Y) {
 	simulator.apply(this);
       },
       stop: function(){
-	this._simulationTimer.cancel();
+	if(this._simulationTimer){
+	  this._simulationTimer.cancel();
+	}
 	this.set("running", false);
       },
       pause: function(){
@@ -113,7 +116,7 @@ YUI.add("simulation", function (Y) {
 	    }
 	    break;
 	  case "down":
-	    paddle.set('y', paddle.get('y') + paddle.speed);
+	    paddle.set('y', paddle.get('y') + paddle.get('speed'));
 	    if (paddle.get('y') + paddle.get('h') > hMax){
 	      paddle.set('y', hMax - paddle.get('h'));
 	    }
