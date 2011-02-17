@@ -89,6 +89,15 @@ YUI.add("snapshot", function (Y) {
 	}
 	return null;
       },
+      getPlayerPaddle: function(player){
+	var paddles = this.getPaddles();
+	for(var key in paddles){
+	  if(paddles[key].get("playerID") == player.id){
+	    return paddles[key];
+	  }
+	}
+	return null;
+      },
       _updateBall: function(ball, toUpdate){
 	var attrs = ball.get("setAttrs");
 	for(var i in attrs){
