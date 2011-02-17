@@ -47,17 +47,27 @@ YUI.add("simulation", function (Y) {
 	}, this);
       },
       addSnapshot: function(snapshotData){
-	this._snapshot = new Y.Pong.Snapshot();
-	this._snapshot.setData(
+	// Save recieved snapshot
+	var snapshot = this._snapshot = new Y.Pong.Snapshot();
+	snapshot.setData(
 	  snapshotData,
 	  this.get('PaddleCls'),
 	  this.get('BallCls'));
-	this._simulated = new Y.Pong.Snapshot();
-	this._simulated.setData(
+	// Create a copy of a recieved snapshot that is used for temporary
+	// client side simulation
+	var simulated = this._simulated = new Y.Pong.Snapshot();
+	simulated.setData(
 	  snapshotData,
 	  this.get('PaddleCls'),
 	  this.get('BallCls'));
-	this._simulated.set('origin', this._snapshot);
+	simulated.set('origin', snapshot);
+	// Simulate snapshot forward to match server - client time delay
+	var timeDelta = ((new Date).getTime() - simulated.get("timestamp")),
+	  framesDelta = parseInt(timeDelta / this.get("simulationData.interval"));
+	this._simulateSnapshotFor(simulated, framesDelta);
+	simulated.set("timestamp", (new Date).getTime());
+	simulated.set('originFramesDelta', framesDelta);
+
       },
       log: function(msg, type){
 	if(! type){
@@ -67,19 +77,17 @@ YUI.add("simulation", function (Y) {
       },
       // internals
       _simulate: function(){
+	var simulated = this._simulated;
 	// Quit if no temporary snapshot is out there
-	if(! this._simulated){
+	if(! simulated){
 	  return;
 	}
-	var simulated = this._simulated,
-	  // Travel time from server->client is assumed the same
-	  // as the other way round
-	  timeDelta = ((new Date).getTime() - simulated.get("timestamp")),
-	  framesDelta = parseInt(timeDelta / this.get("simulationData.interval"));
-	this._simulateSnapshotFor(simulated, framesDelta);
+	// Simulate one cycle
+	this._simulateSnapshotFor(simulated, 1);
+	// Set extra attributes
 	simulated.set("timestamp", (new Date).getTime());
-	simulated.set('originFramesDelta',
-		      simulated.get('originFramesDelta') + framesDelta);
+	simulated.set('originFramesDelta', simulated.get('originFramesDelta') + 1);
+	// Fire simulation step event
 	this.fire(prefix + "step", {}, simulated);
       },
       _simulateSnapshotFor: function(snapshot, frames){
