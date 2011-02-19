@@ -6,14 +6,13 @@ YUI.add("client", function (Y) {
       _connectionHandler: null,
       _simulation: null,
       _renderer: null,
-      _controlsStack: [],
-      _lastKey: null,
       // Interface
       initializer: function(){
 	this._initEvents();
 	this._initConnectionHandler();
 	this._initSimulation();
 	this._initRenderer();
+	this._initInputHandlers();
       },
       connect: function(url){
 	this._connectionHandler.connect(url);
@@ -45,6 +44,7 @@ YUI.add("client", function (Y) {
       bindUI: function(){
 	
       },
+
       // internals
       _initEvents: function(){
 	// Binding other events - glueing everything together
@@ -73,8 +73,9 @@ YUI.add("client", function (Y) {
 	this.on("server:playerData", function(evt, playerData){
 	  this._simulation.set("player", playerData);
 	});
-	Y.one(document).on("keydown", this._onDocumentKeyDown, this);
-	Y.one(document).on("keyup", this._onDocumentKeyUp, this);
+	this.on("input:move", function(evt, moveData){
+	  this.playerMove(moveData);
+	});
       },
       _initConnectionHandler: function(){
 	var ch = this._connectionHandler = new Y.Pong.ConnectionHandler();
@@ -88,40 +89,11 @@ YUI.add("client", function (Y) {
 	var r = this._renderer = new Y.Pong.Renderer();
 	r.addTarget(this);
       },
-      _onDocumentKeyDown: function (evt) {
-	if(this._lastKey == evt.keyCode){
-	  return;
-	}
-	this._lastKey = evt.keyCode;
-	Y.each(this.get("controls.movementKeys"), function(dir){
-	  if(this.get("controls.bindings")[dir] == evt.keyCode){
-	    this._controlsStack.unshift(dir);
-	    this.playerMove(dir);
-	  }
-	}, this);
-	// this.log("on down " + this._controlsStack.toString());
-      },
-      _onDocumentKeyUp: function(evt){
-	this._lastKey = null;
-	// Checking stack of pressed keys, removing this one if present
-	var move;
-	Y.each(this.get("controls.movementKeys"), function(dir, i){
-	  if(this.get("controls.bindings")[dir] == evt.keyCode){
-	    move = dir;
-	  }
-	}, this);
-	for(var i in this._controlsStack){
-	  if(this._controlsStack[i] == move){
-	    this._controlsStack.splice(i);
-	    break;
-	  }
-	}
-	// this.log("on up: " + this._controlsStack.toString());
-	if(this._controlsStack.length){
-	  this.playerMove(this._controlsStack[0]);
-	} else {
-	  this.playerMove("stop");
-	}
+      _initInputHandlers: function(){
+	var k = new Y.Pong.KeyboardHandler({
+	  node: Y.one(document)
+	});
+	k.addTarget(this);
       },
       _commandNotImplemented: function(cmd, data){
 	
@@ -133,18 +105,10 @@ YUI.add("client", function (Y) {
           validator: Y.Lang.isBoolean,
 	  value: false,
 	  readOnly: true
-	},
-	controls: {
-	  value: {
-	    movementKeys: ["up", "down"],
-	    bindings: {
-	      up: 87,
-	      down: 83
-	    }
-	  }
 	}
       }
     }
   );
   Y.log("module loaded", "debug", "client");
-}, "0", { requires: ["connectionhandler", "simulation", "renderer"] });
+}, "0", { requires: ["connectionhandler", "simulation", "renderer",
+		     "keyboardhandler"] });
