@@ -2,13 +2,11 @@ YUI.add("client", function (Y) {
   var Client = Y.namespace("Pong").Client = Y.Base.create(
     "Client", Y.Widget, [],
     {
-      // Shorthands (these are stored in _options anyway)
       _connectionHandler: null,
       _simulation: null,
       _renderer: null,
       // Interface
       initializer: function(){
-	this._initEvents();
 	this._initConnectionHandler();
 	this._initSimulation();
 	this._initRenderer();
@@ -44,10 +42,14 @@ YUI.add("client", function (Y) {
       bindUI: function(){
 	
       },
-
       // internals
-      _initEvents: function(){
-	// Binding other events - glueing everything together
+      _initConnectionHandler: function(){
+	var ch = this._connectionHandler = new Y.Pong.ConnectionHandler();
+	ch.addTarget(this);
+	this._bindConnectionHandler();
+      },
+      _bindConnectionHandler: function(){
+	// Callbacks code is temporary
 	this.on("server:snapshot", function(evt, snapshot){
 	  this._simulation.addSnapshot(snapshot);
 	});
@@ -63,9 +65,6 @@ YUI.add("client", function (Y) {
 	  this._simulation.stop();
 	  this.log("stopping simulation");
 	});
-	this.on("simulation:step", function(evt, snapshot){
-	  this._renderer.renderFrame(snapshot);
-	});
 	this.on("server:gameSimulationData", function(evt, data){
 	  this._simulation.set("simulationData", data);
 	  this._renderer.set("simulationData", data);
@@ -73,17 +72,16 @@ YUI.add("client", function (Y) {
 	this.on("server:playerData", function(evt, playerData){
 	  this._simulation.set("player", playerData);
 	});
-	this.on("input:move", function(evt, moveData){
-	  this.playerMove(moveData);
-	});
-      },
-      _initConnectionHandler: function(){
-	var ch = this._connectionHandler = new Y.Pong.ConnectionHandler();
-	ch.addTarget(this);
       },
       _initSimulation: function(){
 	var sim = this._simulation = new Y.Pong.Simulation();
 	sim.addTarget(this);
+	this._bindSimulation();
+      },
+      _bindSimulation: function(){
+	this.on("simulation:step", function(evt, snapshot){
+	  this._renderer.renderFrame(snapshot);
+	});
       },
       _initRenderer: function(){
 	var r = this._renderer = new Y.Pong.Renderer();
@@ -94,6 +92,12 @@ YUI.add("client", function (Y) {
 	  node: Y.one(document)
 	});
 	k.addTarget(this);
+	this._bindInputHandlers();
+      },
+      _bindInputHandlers: function(){
+	this.on("input:move", function(evt, moveData){
+	  this.playerMove(moveData);
+	});
       },
       _commandNotImplemented: function(cmd, data){
 	
