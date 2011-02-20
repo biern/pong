@@ -14,25 +14,6 @@ YUI.add("renderer", function (Y) {
 	this.on("simulationDataChange", this._onSimulationDataChange);
 	this.on("contentBoxChange", this._onContentBoxChange);
       },
-      _onSimulationDataChange: function(evt){
-	this._updateBoard(evt.newVal.board);
-	if(this._currentSnapshot){
-	  this.renderFrame(this._currentSnapshot);
-	}
-      },
-      _onContentBoxChange: function(evt){
-        this._canvasNode = evt.newVal.appendChild("<canvas></canvas>");
-        this._context = Y.Node.getDOMNode(this._canvasNode).getContext("2d");
-	this._updateBoard(this.get("simulationData.board"));
-	// this._context.fillStyle = this.get("color");
-	// this._context.fillRect(0,0,100,200);
-      },
-      _updateBoard: function(board){
-	this._canvasNode.setAttrs({
-	  width: board.w,
-	  height: board.h
-	});
-      },
       renderFrame: function(snapshot){
 	var ctx = this._context,
 	  balls = snapshot.getBalls(),
@@ -56,6 +37,29 @@ YUI.add("renderer", function (Y) {
 	for (var i in paddles){
 	  this._drawPaddle(paddles[i]);
 	}
+      },
+      clear: function(){
+	var board = this.get("simulationData.board");
+	this._context.clearRect(0, 0, board.w, board.h);
+      },
+      _onSimulationDataChange: function(evt){
+	this._updateBoard(evt.newVal.board);
+	if(this._currentSnapshot){
+	  this.renderFrame(this._currentSnapshot);
+	}
+      },
+      _onContentBoxChange: function(evt){
+        this._canvasNode = evt.newVal.appendChild("<canvas></canvas>");
+        this._context = Y.Node.getDOMNode(this._canvasNode).getContext("2d");
+	this._updateBoard(this.get("simulationData.board"));
+	// this._context.fillStyle = this.get("color");
+	// this._context.fillRect(0,0,100,200);
+      },
+      _updateBoard: function(board){
+	this._canvasNode.setAttrs({
+	  width: board.w,
+	  height: board.h
+	});
       },
       _renderOriginFrame: function(snapshot){
 	var ctx = this._context,

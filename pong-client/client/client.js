@@ -62,8 +62,7 @@ YUI.add("client", function (Y) {
 	  }
 	});
 	this.on("server:connectionClosed", function(evt){
-	  this._simulation.stop();
-	  this.log("stopping simulation");
+	  this._onGameStopped();
 	});
 	this.on("server:gameSimulationData", function(evt, data){
 	  this._simulation.set("simulationData", data);
@@ -101,6 +100,11 @@ YUI.add("client", function (Y) {
       },
       _commandNotImplemented: function(cmd, data){
 	
+      },
+      _onGameStopped: function(){
+	this._simulation.stop();
+	this._renderer.clear();
+	this.log("Game stopped");
       }
     },
     {
