@@ -164,7 +164,8 @@ YUI.add("connectionhandler", function (Y) {
 	  value: ['authRequest', 'authSuccess', 'authFailed', 'pingResponse',
 		  'debugMessage', 'serverMessage', 'snapshot', 'gameStartCount',
 		  'gameSimulationData', 'gameNewRound', 'gameScoreSelf',
-		  'gameScoreRival', 'gameScore', 'playerData'],
+		  'gameScoreRival', 'gameScore', 'gameRivalLeft',
+		  'gameFinished', 'playerData'],
 	  readOnly: true
 	},
 	eventNames: {
