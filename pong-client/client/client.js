@@ -7,6 +7,7 @@ YUI.add("client", function (Y) {
       _renderer: null,
       // Interface
       initializer: function(){
+	this._publishEvents();
 	this._initConnectionHandler();
 	this._initSimulation();
 	this._initRenderer();
@@ -43,6 +44,16 @@ YUI.add("client", function (Y) {
 	
       },
       // internals
+      _publishEvents: function(){
+	var eventNames = this.get('eventNames');
+	for(var i in eventNames){
+	  this.publish(eventNames[i], {
+	    broadcast: 0,
+	    bubbles: true,
+	    emitFacade: true
+	  });
+	}
+      },
       _initConnectionHandler: function(){
 	var ch = this._connectionHandler = new Y.Pong.ConnectionHandler();
 	ch.addTarget(this);
@@ -69,6 +80,14 @@ YUI.add("client", function (Y) {
 	});
 	this.on("server:playerData", function(evt, playerData){
 	  this._simulation.set("player", playerData);
+	});
+	this.on("server:gameRivalLeft", function(evt, rival){
+	  this._gameMessage("Rival left");
+	  this._onGameStopped();
+	});
+	this.on("server:gameFinished", function(){
+	  this._gameMessage("Game finished");
+	  this._onGameStopped();
 	});
       },
       _initSimulation: function(){
@@ -104,6 +123,7 @@ YUI.add("client", function (Y) {
 	this._simulation.stop();
 	this._renderer.clear();
 	this.log("Game stopped");
+	this.fire("gameStopped");
       },
       _gameMessage: function(text){
 	this.fire("gameMessage", {}, text);
@@ -114,6 +134,10 @@ YUI.add("client", function (Y) {
 	ingame: {
           validator: Y.Lang.isBoolean,
 	  value: false,
+	  readOnly: true
+	},
+	eventNames: {
+	  value: ['gameMessage', 'gameStopped'],
 	  readOnly: true
 	}
       }
