@@ -68,8 +68,8 @@ YUI.add("client", function (Y) {
 	  this._gameMessage("Start in: " + count);
 	});
 	this.on("server:gameNewRound", function(evt){
-	    this._gameMessage("New round");
-	    this._simulation.start();
+	  this._gameMessage("New round");
+	  this._onGameStarted();
 	});
 	this.on("server:connectionClosed", function(evt){
 	  this._onGameStopped();
@@ -119,11 +119,21 @@ YUI.add("client", function (Y) {
       _commandNotImplemented: function(cmd, data){
 	
       },
+      _onGameStarted: function(){
+	if(!this.get('ingame')){
+	  this._set('ingame', true);
+	  this._simulation.start();
+	  this.fire("gameStarted");
+	}
+      },
       _onGameStopped: function(){
-	this._simulation.stop();
-	this._renderer.clear();
-	this.log("Game stopped");
-	this.fire("gameStopped");
+	if(this.get('ingame')){
+	  this._set('ingame', false);
+	  this._simulation.stop();
+	  this._renderer.clear();
+	  this.log("Game stopped");
+	  this.fire("gameStopped");
+	}
       },
       _gameMessage: function(text){
 	this.fire("gameMessage", {}, text);
@@ -137,7 +147,7 @@ YUI.add("client", function (Y) {
 	  readOnly: true
 	},
 	eventNames: {
-	  value: ['gameMessage', 'gameStopped'],
+	  value: ['gameMessage', 'gameStopped', 'gameStarted'],
 	  readOnly: true
 	}
       }
