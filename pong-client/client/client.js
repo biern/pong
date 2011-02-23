@@ -53,13 +53,12 @@ YUI.add("client", function (Y) {
 	this.on("server:snapshot", function(evt, snapshot){
 	  this._simulation.addSnapshot(snapshot);
 	});
-	this.on("server:gameStart", function(evt, count){
-	  if(count == 1){
-	    this.log("START");
+	this.on("server:gameStartCount", function(evt, count){
+	  this._gameMessage("Start in: " + count);
+	});
+	this.on("server:gameNewRound", function(evt){
+	    this._gameMessage("New round");
 	    this._simulation.start();
-	  } else {
-	    this.log("Start in: " + count, "info");
-	  }
 	});
 	this.on("server:connectionClosed", function(evt){
 	  this._onGameStopped();
@@ -105,6 +104,9 @@ YUI.add("client", function (Y) {
 	this._simulation.stop();
 	this._renderer.clear();
 	this.log("Game stopped");
+      },
+      _gameMessage: function(text){
+	this.fire("gameMessage", {}, text);
       }
     },
     {
