@@ -4,16 +4,6 @@ sys = require 'sys'
 
 module.exports =
 class Player extends events.EventEmitter
-  #  - Configurable attrs -
-  # Attributes that are sent to client as player info
-  sendAttrs = ['id', 'name', 'ingame', 'quickgame']
-  # Events that are handled and emited when recieved from client
-  # This can be augumented to reduce / extend client functions
-  clientEvents = ['pingRequest', 'gameRequested']
-  # - Private attrs -
-  # Other events. Defined here to skip binding them to handlers one by one
-  _events = ['disconnect', 'quickgame']
-  _lastID = 0
   constructor: (@connection) ->
     # connection has to define following interface:
     # .on( ('message|disconnect'), callback)
@@ -24,12 +14,19 @@ class Player extends events.EventEmitter
     @quickGame = no
     @_bindEvents()
     @_bindConnection connection
+    @sendPlayerInfo()
 
   send: (type, data) ->
-    @connection.send JSON.stringify({ type: type, data: data })
+    @connection.send @makeResponse(type, data)
 
   sendMessage: (msg) ->
     @connection.send JSON.stringify({ type: 'serverMessage', data: msg })
+
+  sendRaw: (str) ->
+    @connection.send str
+
+  makeResponse: (type, data) ->
+    JSON.stringify({ type: type, data: data })
 
   toJSON: ->
     result = {}
@@ -37,6 +34,9 @@ class Player extends events.EventEmitter
       result[attr] = @[attr]
 
     result
+
+  sendPlayerInfo: ->
+    @send 'playerInfo', this
 
   _bindConnection: (connection) ->
     connection.on "message", (rawData) =>
@@ -62,5 +62,17 @@ class Player extends events.EventEmitter
   _onPingRequest: (data) ->
     @send 'pingResponse', data
 
-  _onQuickGame: ->
-    @quickGame = yes
+  _onGameQuick: (value=true) ->
+    @quickGame = value
+
+
+#- Configurable static attrs -
+# Attributes that are sent to client as player info
+Player::sendAttrs = ['id', 'name', 'ingame', 'quickGame']
+# Events that are handled and emited when recieved from client
+# This can be augumented to reduce / extend client functions
+Player::clientEvents = ['pingRequest', 'gameRequest', 'gameQuick']
+# - Private static attrs -
+# Other events. Defined here to skip binding them to handlers one by one
+Player::_events = ['disconnect']
+Player::_lastID = 0

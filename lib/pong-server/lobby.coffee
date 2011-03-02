@@ -1,5 +1,6 @@
 events = require 'events'
 Game = require __dirname + '/game'
+Player = require __dirname + '/player'
 
 module.exports =
 class Lobby extends events.EventEmitter
@@ -9,24 +10,64 @@ class Lobby extends events.EventEmitter
 
   joinPlayer: (player) ->
     @_bindPlayerEvents player
+    player.send "lobbyEntered", name: @name
+    @sendPlayersList player
+    for p in @players
+      p.send "lobbyPlayerJoined", player
+
+    # Update players list at the end
     @players.push player
-    player.sendMessage "Joined " + @name
 
   removePlayer: (player) ->
-    @players.remove player
+    index = -1
+    for p, i in @players
+      p.send "lobbyPlayerLeft", player
+      if p == player
+        index = i
+
+    player.send "lobbyLeft", name: @name
+    # Update players list at the end
+    #TODO: Unbind player lobby events
+    if index >= 0
+      @players.splice index
+
+  sendPlayersList: (player) ->
+    player.send "lobbyPlayersList", players: @players
+
+  sendToPlayers: (type, data, players=@players) ->
+    response = Player::makeResponse type, data
+    for p in players
+      p.sendRaw response
+
+  sendPlayerUpdated: (player, changed) ->
+    # Some attribute(s) of a player changed
+    @sendToPlayers "lobbyPlayerUpdated",
+      player: player,
+      changed: changed
 
   _bindPlayerEvents: (player) ->
     player.on 'disconnect', =>
       @removePlayer player
-    player.on 'quickgame', =>
-      @_quickGameRequested player
+    player.on 'lobbyLeave', =>
+      @removePlayer player
+    player.on 'lobbyPlayersList', =>
+      @sendPlayersList player
+    player.on 'gameQuick', (value) =>
+      @_playerQuickGame player, value
+    player.on 'gameRequest', =>
+      "TODO"
 
-  _quickGameRequested: (player) ->
+  _playerQuickGame: (player, value) ->
+    if value
+      return
+
     for p in @players
       if not p.ingame and p.quickgame and p != player
-        @_newGame player, p
-        return
+        return @_newGame player, p
+
+    @sendPlayerUpdated player, ['quickGame']
 
   _newGame: (p1, p2) ->
     @games.push new Game(p1, p2)
-
+    @sendPlayerUpdated p1, ['ingame']
+    @sendPlayerUpdated p2, ['ingame']
