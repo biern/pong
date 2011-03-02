@@ -2,6 +2,9 @@ events = require 'events'
 Game = require __dirname + '/game'
 Player = require __dirname + '/player'
 
+# TODO: Move to some 'utils' module
+Array::remove = (e) -> @[t..t] = [] if (t = @.indexOf(e)) > -1
+
 module.exports =
 class Lobby extends events.EventEmitter
   constructor: (@name) ->
@@ -19,17 +22,13 @@ class Lobby extends events.EventEmitter
     @players.push player
 
   removePlayer: (player) ->
-    index = -1
     for p, i in @players
       p.send "lobbyPlayerLeft", player
-      if p == player
-        index = i
 
     player.send "lobbyLeft", name: @name
     # Update players list at the end
     #TODO: Unbind player lobby events
-    if index >= 0
-      @players.splice index
+    @players.remove player
 
   sendPlayersList: (player) ->
     player.send "lobbyPlayersList", players: @players
