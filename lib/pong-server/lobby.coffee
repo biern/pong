@@ -62,7 +62,7 @@ class Lobby extends events.EventEmitter
       return
 
     for p in @players
-      if not p.ingame and p.quickgame and p != player
+      if not p.ingame and p.quickGame and p != player
         return @_newGame player, p
 
     @sendPlayerUpdated player, ['quickGame']

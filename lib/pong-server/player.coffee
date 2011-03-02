@@ -8,8 +8,9 @@ class Player extends events.EventEmitter
     # connection has to define following interface:
     # .on( ('message|disconnect'), callback)
     # .send(data)
-    @id = (@_lastID += 1)
+    @id = (Player::_lastID += 1)
     @name = "anonymous player #" + @id
+    console.log "Player: " + @name + " created"
     @ingame = no
     @quickGame = no
     @_bindEvents()
