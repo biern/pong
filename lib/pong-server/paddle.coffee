@@ -1,7 +1,7 @@
 events = require 'events'
 
 class Paddle extends events.EventEmitter
-  constructor: (board, data) ->
+  constructor: (data) ->
     { @x, @y, @w, @h, @speed, @accel, @player } = data
     @moving = "false"
 

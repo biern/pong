@@ -1,11 +1,18 @@
 events = require 'events'
 
 class Ball extends events.EventEmitter
-  constructor: (board, data) ->
-    { @x, @y, @r, @dir, @speed, @timeout, @minAngle } = data
+  constructor: (data) ->
+    { @x, @y, @r, @dir, @speed, @accel, @timeout, @minAngle } = data
     @timeout ?= 0
     @minAngle ?= Math.PI / 6
+    if @dir == 'random'
+      @dir = @randomDir()
+
     @on 'paddleBounce', @_onPaddleBounce
+
+  randomDir: ->
+    (@minAngle * 2 + Math.random() * (Math.PI - 2 * @minAngle * 2)) +
+            Math.PI * (if Math.random() <= 0.5 then 0 else 1)
 
   simulate: (board) ->
     if @timeout > 0
@@ -51,3 +58,4 @@ class Ball extends events.EventEmitter
     else
       @dir = Math.PI + @minAngle +
          (1 - bouncePoint) * (Math.PI - 2 * @minAngle)
+    @speed += @accel
