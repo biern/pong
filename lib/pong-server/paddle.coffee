@@ -1,8 +1,9 @@
 events = require 'events'
 
+module.exports =
 class Paddle extends events.EventEmitter
   constructor: (data) ->
-    { @x, @y, @w, @h, @speed, @accel, @player } = data
+    { @id, @x, @y, @w, @h, @speed, @accel, @player } = data
     @moving = "false"
 
   move: (dir) ->
@@ -22,4 +23,4 @@ class Paddle extends events.EventEmitter
         @y = board.h - @h if @y + @h > board.h
 
   toJSON: ->
-    { @x, @y, @w, @h, @speed, @accel, playerID: @player.id }
+    { @id, @x, @y, @w, @h, @speed, @accel, playerID: @player.id }

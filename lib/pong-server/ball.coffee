@@ -1,8 +1,9 @@
 events = require 'events'
 
+module.exports =
 class Ball extends events.EventEmitter
   constructor: (data) ->
-    { @x, @y, @r, @dir, @speed, @accel, @timeout, @minAngle } = data
+    { @id, @x, @y, @r, @dir, @speed, @accel, @timeout, @minAngle } = data
     @timeout ?= 0
     @minAngle ?= Math.PI / 6
     if @dir == 'random'
@@ -48,7 +49,7 @@ class Ball extends events.EventEmitter
       @emit 'wallBounce'
 
   toJSON: ->
-    { @x, @y, @r, @dir, @speed, @timeout }
+    { @id, @x, @y, @r, @dir, @speed, @timeout }
 
   _onPaddleBounce: (paddle) ->
     # Calculating new direction

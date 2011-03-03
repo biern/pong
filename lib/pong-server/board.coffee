@@ -1,14 +1,18 @@
 events = require 'events'
+Paddle = require __dirname + '/paddle'
+Ball = require __dirname + '/ball'
 
+module.exports =
 class Board extends events.EventEmitter
   # Emits 'score' (player)
   _paused: no
   simulator: {}
-  constructor: (@w, @h, @fps, @player1, @player2) ->
+  constructor: (data, @player1, @player2) ->
+    { @w, @h, @fps } = data
+    @_lastID = 0
     @balls = []
     @paddles = []
     @interval = 1000 / @fps
-    @_createPlayersPaddles
 
   start: ->
     @_simulate()
@@ -23,14 +27,24 @@ class Board extends events.EventEmitter
     @_paused = no
 
   newRound: (timeout) ->
+    @clear()
+    @_createPlayersPaddles()
+    @_createStartBall(timeout)
+
+  clear: ->
+    @balls = []
+    @paddles = []
 
   createBall: (data) ->
+    data.id = @_newID()
+    console.log 'ID: ' + data.id
     ball = new Ball data
     @_bindBall ball
     @balls.push ball
     ball
 
   createPaddle: (data) ->
+    data.id = @_newID()
     paddle = new Paddle data
     @_bindPaddle paddle
     @paddles.push paddle
@@ -45,20 +59,26 @@ class Board extends events.EventEmitter
     paddles: @paddles
     timestamp: (new Date).getTime()
 
+  _newID: ->
+    (@_lastID += 1)
+
   _createPlayersPaddles: ->
+    w = 12
+    h = 50
     @players (player) =>
       @createPaddle
         x: if player == @player1 then 0 else @w - w
         y: (@h - h) / 2
-        w: 12, h: 50,
+        w: w, h: h,
         speed: 2.5, accel: 0.12
         player: player
 
   _createStartBall: (timeout) ->
+    r = 3
     @createBall
       x: @w / 2 - r
       y: @h / 2 - r
-      r: 3
+      r: r
       speed: 3, accel: 0.1
       dir: 'random'
       timeout: timeout
@@ -73,14 +93,18 @@ class Board extends events.EventEmitter
     # ball.on 'paddleBounce' =>
 
   _simulate: ->
-    @simulator =>
+    @simulator = =>
       if not @paused
         @_simulationCycle()
+        @emit "simulationCycle"
 
       if not @simulator.stop
-        setTimeout (=> @simulator()), @simulationData.interval
+        setTimeout (=> @simulator()), @interval
+      else
+        @simulator.running = no
 
     @simulator.stop = no
+    @simulator.running = yes
     @simulator()
 
   _simulationCycle: ->
@@ -89,5 +113,3 @@ class Board extends events.EventEmitter
 
     for paddle in @paddles
       paddle.simulate(this)
-
-    @emit "simulationCycle"

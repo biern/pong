@@ -7,11 +7,17 @@ Array::remove = (e) -> @[t..t] = [] if (t = @.indexOf(e)) > -1
 
 module.exports =
 class Lobby extends events.EventEmitter
+  gameParams:
+    fps: 66
+    w: 550
+    h: 400
+
   constructor: (@name) ->
     @players = []
     @games = []
 
   joinPlayer: (player) ->
+    console.log "New player joined. Count: " + @players.length
     @_bindPlayerEvents player
     player.send "lobbyEntered", name: @name
     @sendPlayersList player
@@ -67,6 +73,6 @@ class Lobby extends events.EventEmitter
     @sendPlayerUpdated player, ['quickGame']
 
   _newGame: (p1, p2) ->
-    @games.push new Game(p1, p2)
+    @games.push new Game(@gameParams, p1, p2)
     @sendPlayerUpdated p1, ['ingame']
     @sendPlayerUpdated p2, ['ingame']
