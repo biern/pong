@@ -3,7 +3,6 @@ Board = require __dirname + '/board'
 Player = require __dirname + '/player'
 
 # TODO: Redesign simulationData, board data format
-# TODO: Redesign game* clients events flow
 
 module.exports =
 class Game extends events.EventEmitter
@@ -44,8 +43,6 @@ class Game extends events.EventEmitter
         @board.newRound()
 
       @players (player) =>
-        # Sending messages to players
-        # TODO: gameScore* -> gameScore + attrs
         player.send 'gameScore',
           scores: scores,
           player: playerScored,
