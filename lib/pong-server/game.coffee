@@ -46,21 +46,13 @@ class Game extends events.EventEmitter
       @players (player) =>
         # Sending messages to players
         # TODO: gameScore* -> gameScore + attrs
-        if player == playerScored
-          player.send 'gameScoreSelf',
-        else
-          player.send 'gameScoreRival'
+        player.send 'gameScore',
+          scores: scores,
+          player: playerScored,
+          self: player == playerScored,
 
-        player.send 'gameScore', scores: scores
-
-        # TODO: gameFinished/Won/Lost -> gameFinished + attrs
         if @finished
-          player.send 'gameFinished'
-          if playerScored == playerScored
-            player.send 'gameWon'
-          else
-            player.send 'gameLost'
-        else
+          player.send 'gameFinished', winner: playerScored
 
   _gameFinished: ->
     @finished = yes
