@@ -1,14 +1,24 @@
 events = require 'events'
-sys = require 'sys'
-
 
 module.exports =
 class Player extends events.EventEmitter
+  # - Configurable static attrs -
+  # Attributes that are sent to client as player info
+  sendAttrs: ['id', 'name', 'ingame', 'quickGame']
+  # Events that are handled and emited when recieved from client
+  # This can be augumented to reduce / extend client functions
+  clientEvents: ['pingRequest', 'gameRequest', 'gameQuick', 'playerMove']
+  # - Private static attrs -
+  _lastID: 0
+  # NEVER EVER UNCOMMENT THE NEXT LINE
+  # adding _events property silently breaks and twists whole EventEmitter
+  # functionality. BEWARE!
+  # _events = ['disconnect']
   constructor: (@connection) ->
-    # connection has to define following interface:
-    # .on( ('message|disconnect'), callback)
-    # .send(data)
-    @id = (Player::_lastID += 1)
+    # # connection has to define following interface:
+    # # .on( ('message|disconnect'), callback)
+    # # .send(data)
+    @id = (@_lastID += 1)
     @name = "anonymous player #" + @id
     console.log "Player: " + @name + " created"
     @ingame = no
@@ -55,7 +65,7 @@ class Player extends events.EventEmitter
       @emit "disconnect"
 
   _bindEvents: ->
-    for array in [@clientEvents, @_events]
+    for array in [@clientEvents, events]
       for name in array
         handler = @['_on' + name[0].toUpperCase() + name[1..]]
         @on(name, handler) if handler?
@@ -65,15 +75,3 @@ class Player extends events.EventEmitter
 
   _onGameQuick: (value=true) ->
     @quickGame = value
-
-
-#- Configurable static attrs -
-# Attributes that are sent to client as player info
-Player::sendAttrs = ['id', 'name', 'ingame', 'quickGame']
-# Events that are handled and emited when recieved from client
-# This can be augumented to reduce / extend client functions
-Player::clientEvents = ['pingRequest', 'gameRequest', 'gameQuick']
-# - Private static attrs -
-# Other events. Defined here to skip binding them to handlers one by one
-Player::_events = ['disconnect']
-Player::_lastID = 0
