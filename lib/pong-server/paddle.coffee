@@ -23,4 +23,4 @@ class Paddle extends events.EventEmitter
         @y = board.h - @h if @y + @h > board.h
 
   toJSON: ->
-    { @id, @x, @y, @w, @h, @speed, @accel, playerID: @player.id }
+    { @id, @x, @y, @w, @h, @speed, @accel, @moving, playerID: @player.id }
