@@ -21,7 +21,6 @@ class Game extends events.EventEmitter
         return
 
       response = Player::makeResponse 'snapshot', @board.getSnapshot()
-      console.log response
       @players (player) =>
         player.sendRaw response
 
@@ -49,7 +48,9 @@ class Game extends events.EventEmitter
           self: player == playerScored,
 
         if @finished
-          player.send 'gameFinished', winner: playerScored
+          player.send 'gameFinished',
+            winner: playerScored,
+            won: playerScored == player
 
   _gameFinished: ->
     @finished = yes
