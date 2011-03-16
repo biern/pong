@@ -9,7 +9,7 @@ class Player extends events.EventEmitter
   # This can be augumented to reduce / extend client functions
   clientEvents: ['pingRequest', 'gameRequest', 'gameQuick', 'playerMove']
   # - Private static attrs -
-  _lastID: 0
+  _lastID = 0
   # NEVER EVER UNCOMMENT THE NEXT LINE
   # adding _events property silently breaks and twists whole EventEmitter
   # functionality. BEWARE!
@@ -18,14 +18,14 @@ class Player extends events.EventEmitter
     # # connection has to define following interface:
     # # .on( ('message|disconnect'), callback)
     # # .send(data)
-    @id = (@_lastID += 1)
+    @id = (_lastID += 1)
     @name = "anonymous player #" + @id
     console.log "Player: " + @name + " created"
     @ingame = no
     @quickGame = no
     @_bindEvents()
     @_bindConnection connection
-    @sendPlayerInfo()
+    @sendPlayerData()
 
   send: (type, data) ->
     @connection.send @makeResponse(type, data)
@@ -46,8 +46,8 @@ class Player extends events.EventEmitter
 
     result
 
-  sendPlayerInfo: ->
-    @send 'playerInfo', this
+  sendPlayerData: ->
+    @send 'playerData', this
 
   _bindConnection: (connection) ->
     connection.on "message", (rawData) =>
