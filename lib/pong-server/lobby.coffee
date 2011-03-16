@@ -7,6 +7,8 @@ Array::remove = (e) -> @[t..t] = [] if (t = @.indexOf(e)) > -1
 
 module.exports =
 class Lobby extends events.EventEmitter
+  _playerEvents:
+    ['disconnect', 'lobbyLeave', 'lobbyPlayersList', 'gameQuick', 'gameRequest']
   gameParams:
     fps: 66
     w: 550
@@ -17,7 +19,6 @@ class Lobby extends events.EventEmitter
     @games = []
 
   joinPlayer: (player) ->
-    console.log "New player joined. Count: " + @players.length
     @_bindPlayerEvents player
     player.send "lobbyEntered", name: @name
     @sendPlayersList player
@@ -26,6 +27,8 @@ class Lobby extends events.EventEmitter
 
     # Update players list at the end
     @players.push player
+    console.log "New player joined to " + @name +
+                ". Players: " + (@players.length)
 
   removePlayer: (player) ->
     for p, i in @players
@@ -34,7 +37,9 @@ class Lobby extends events.EventEmitter
     player.send "lobbyLeft", name: @name
     # Update players list at the end
     #TODO: Unbind player lobby events
+    @_unbindPlayerEvents player
     @players.remove player
+    console.log "Player left " + @name + ". Players: " + (@players.length )
 
   sendPlayersList: (player) ->
     player.send "lobbyPlayersList", players: @players
@@ -51,16 +56,37 @@ class Lobby extends events.EventEmitter
       changed: changed
 
   _bindPlayerEvents: (player) ->
-    player.on 'disconnect', =>
-      @removePlayer player
-    player.on 'lobbyLeave', =>
-      @removePlayer player
-    player.on 'lobbyPlayersList', =>
-      @sendPlayersList player
-    player.on 'gameQuick', (value) =>
+    for type in @_playerEvents
+      do (type) =>
+        handler = (args...) =>
+          @['_onPlayer' + type[0].toUpperCase() + type[1..]](player, args...)
+        player.on type, handler
+
+  _onPlayerDisconnect: (player) ->
+    console.log "Player left"
+    @removePlayer player
+
+  _onPlayerLobbyLeave: (player) ->
+    @removePlayer player
+
+  _onPlayerGameQuick: (player, value) ->
       @_playerQuickGame player, value
-    player.on 'gameRequest', =>
-      "TODO"
+
+  _unbindPlayerEvents: (player) ->
+    # player.removeAllListeners 'gameQuick'
+    # player.removeAllListeners ''
+
+  _bindGameEvents: (game) ->
+    game.on 'gameFinished', =>
+      game.players (player) =>
+        player.ingame = false
+        player.quickGame = false
+        @sendPlayerUpdated player, ['ingame', 'quickGame']
+
+      @games.remove game
+      delete game
+
+  # TODO: unbindGameEvents
 
   _playerQuickGame: (player, value) ->
     if value
@@ -73,6 +99,10 @@ class Lobby extends events.EventEmitter
     @sendPlayerUpdated player, ['quickGame']
 
   _newGame: (p1, p2) ->
-    @games.push new Game(@gameParams, p1, p2)
-    @sendPlayerUpdated p1, ['ingame']
-    @sendPlayerUpdated p2, ['ingame']
+    console.log "New game between " + p1.id + " and " + p2.id
+    game = new Game(@gameParams, p1, p2)
+    @_bindGameEvents game
+    @games.push game
+    for p in [p1, p2]
+      p.ingame =  true
+      @sendPlayerUpdated p, ['ingame']
