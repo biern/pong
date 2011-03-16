@@ -37,7 +37,6 @@ class Board extends events.EventEmitter
 
   createBall: (data) ->
     data.id = @_newID()
-    console.log 'ID: ' + data.id
     ball = new Ball data
     @_bindBall ball
     @balls.push ball
@@ -66,12 +65,16 @@ class Board extends events.EventEmitter
     w = 12
     h = 50
     @players (player) =>
-      @createPaddle
+      paddle = @createPaddle
         x: if player == @player1 then 0 else @w - w
         y: (@h - h) / 2
         w: w, h: h,
         speed: 2.5, accel: 0.12
         player: player
+
+      # Binding player movement commands
+      player.on 'playerMove', (dir) =>
+        paddle.move dir
 
   _createStartBall: (timeout) ->
     r = 3
