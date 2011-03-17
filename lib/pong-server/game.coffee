@@ -6,6 +6,7 @@ Player = require __dirname + '/player'
 
 module.exports =
 class Game extends events.EventEmitter
+  newRoundTimeout: 3000
   snapshotInterval: 400
   finished = no
   constructor: (@data, @player1, @player2) ->
@@ -39,7 +40,7 @@ class Game extends events.EventEmitter
       if score >= 3
         @_gameFinished()
       else
-        @board.newRound(3000)
+        @board.newRound(@newRoundTimeout)
 
       @players (player) =>
         player.send 'gameScore',
@@ -63,7 +64,7 @@ class Game extends events.EventEmitter
     @players (player) =>
       player.send 'gameNewRound'
     @board.start()
-    @board.newRound()
+    @board.newRound(@newRoundTimeout)
 
   players: (func) ->
     func.call this, @player1, @player2, 0
