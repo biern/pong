@@ -39,7 +39,7 @@ class Game extends events.EventEmitter
       if score >= 3
         @_gameFinished()
       else
-        @board.newRound()
+        @board.newRound(3000)
 
       @players (player) =>
         player.send 'gameScore',
