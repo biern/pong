@@ -2,9 +2,6 @@ events = require 'events'
 Game = require __dirname + '/game'
 Player = require __dirname + '/player'
 
-# TODO: Move to some 'utils' module
-Array::remove = (e) -> @[t..t] = [] if (t = @.indexOf(e)) > -1
-
 module.exports =
 class Lobby extends events.EventEmitter
   _playerEvents:
