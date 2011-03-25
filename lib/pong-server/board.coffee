@@ -30,6 +30,8 @@ class Board extends events.EventEmitter
     @clear()
     @_createPlayersPaddles()
     @_createStartBall(timeout)
+    @players (player) =>
+      player.send 'gameNewRound'
 
   clear: ->
     @balls = []

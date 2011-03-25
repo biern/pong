@@ -61,8 +61,6 @@ class Game extends events.EventEmitter
   _start: ->
     @_initBoard()
     @_initSnapshotSender()
-    @players (player) =>
-      player.send 'gameNewRound'
     @board.start()
     @board.newRound(@newRoundTimeout)
 
