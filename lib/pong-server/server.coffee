@@ -1,8 +1,8 @@
 events = require 'events'
 
 module.exports =
-class Pong extends events.EventEmitter
-  constructor: (@info) ->
+class Server extends events.EventEmitter
+  constructor: (@description) ->
     @lobbies = []
     @players = []
 
@@ -26,6 +26,6 @@ class Pong extends events.EventEmitter
       @removePlayer player
 
   toJSON: (player) ->
-    info: @info,
+    description: @description
     lobbies: [l.toJSON player for l in @lobbies]
     playersNum: @players.length
