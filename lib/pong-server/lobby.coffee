@@ -11,13 +11,16 @@ class Lobby extends events.EventEmitter
     w: 550
     h: 400
 
-  constructor: (@name) ->
+  constructor: (@name, @description="", @_playerTest=(player)->{pass: true}) ->
     @players = []
     @games = []
 
   joinPlayer: (player) ->
+    if not @playerPassesTest player
+      return false
+
     @_bindPlayerEvents player
-    player.send "lobbyEntered", name: @name
+    player.send "lobbyEntered", @toJSON player
     @sendPlayersList player
     for p in @players
       p.send "lobbyPlayerJoined", player
@@ -26,6 +29,10 @@ class Lobby extends events.EventEmitter
     @players.push player
     console.log "New player joined to " + @name +
                 ". Players: " + (@players.length)
+    return true
+
+  playerPassesTest: (player) ->
+    @_playerTest.call this, player
 
   removePlayer: (player) ->
     for p, i in @players
@@ -52,6 +59,14 @@ class Lobby extends events.EventEmitter
       player: player,
       changed: changed
 
+  toJSON: (player=null) ->
+    { pass, comment } = @playerPassesTest player
+    playersNum: @players.length
+    gameParams: @gameParams
+    name: @name
+    canJoin: pass
+    reason: comment
+
   _bindPlayerEvents: (player) ->
     for type in @_playerEvents
       do (type) =>
@@ -77,7 +92,10 @@ class Lobby extends events.EventEmitter
     game.on 'gameFinished', =>
       game.players (player) =>
         player.ingame = false
-        player.quickGame = false
+        # Debug only - in future change to:
+        # player.quickGame = false
+        player.quickGame = true
+        player.emit 'quickGame'
         @sendPlayerUpdated player, ['ingame', 'quickGame']
 
       @games.remove game
