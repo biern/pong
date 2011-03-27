@@ -1,6 +1,6 @@
 events = require 'events'
 
-exports.Pong =
+module.exports =
 class Pong extends events.EventEmitter
   constructor: (@info) ->
     @lobbies = []
@@ -10,19 +10,22 @@ class Pong extends events.EventEmitter
     @lobbies.push lobby
 
   addPlayer: (player) ->
-    players.push player
+    @players.push player
+    @_bindPlayerEvents player
+    @playerSendInfo player
 
   removePlayer: (player) ->
-    players.remove player
+    @players.remove player
 
   playerSendInfo: (player) ->
-    player.send 'pongInfo', this
+    player.sendRaw player.makeResponse 'pongInfo', @toJSON player
 
   _bindPlayerEvents: (player) ->
     # TODO: Bind joining to lobbies
     player.on 'disconnect', =>
       @removePlayer player
 
-  toJSON: ->
-    lobbies = [l.toJSONMini() for l in @lobbies]
-    { @info, lobbies, @players }
+  toJSON: (player) ->
+    lobbies = [l.toJSON player for l in @lobbies]
+    { @info, lobbies,
+       playersNum: @players.length }
