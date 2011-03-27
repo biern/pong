@@ -26,9 +26,6 @@ class Pong extends events.EventEmitter
       @removePlayer player
 
   toJSON: (player) ->
-    lobbies = [l.toJSON player for l in @lobbies]
-    return {
-      info: @info
-      lobbies: lobbies
-      playersNum: @players.length
-    }
+    info: @info,
+    lobbies: [l.toJSON player for l in @lobbies]
+    playersNum: @players.length
