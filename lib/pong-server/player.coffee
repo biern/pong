@@ -65,7 +65,7 @@ class Player extends events.EventEmitter
       @emit "disconnect"
 
   _bindEvents: ->
-    for array in [@clientEvents, events]
+    for array in [@clientEvents]
       for name in array
         handler = @['_on' + name[0].toUpperCase() + name[1..]]
         @on(name, handler) if handler?
