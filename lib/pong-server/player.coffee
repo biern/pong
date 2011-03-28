@@ -10,7 +10,7 @@ class Player extends events.EventEmitter
   clientEvents: ['pingRequest', 'gameRequest', 'gameQuick', 'playerMove']
   # All other events (not including clientEvents)
   # This attribute is used mostely for automatic binding methods to events
-  emittedEvents: []
+  emittedEvents: ['disconnect']
   # - Private static attrs -
   _lastID = 0
   # Warning: Never add _events attr like that. Silently breaks whole
