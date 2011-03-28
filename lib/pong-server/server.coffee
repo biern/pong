@@ -1,31 +1,32 @@
 events = require 'events'
+PlayerContainer = require __dirname + '/playercontainer'
 
 module.exports =
-class Server extends events.EventEmitter
+class Server extends PlayerContainer
   constructor: (@description) ->
     @lobbies = []
-    @players = []
+    super
 
   addLobby: (lobby) ->
     @lobbies.push lobby
 
   addPlayer: (player) ->
-    @players.push player
-    @_bindPlayerEvents player
+    super player
     @playerSendInfo player
 
   removePlayer: (player) ->
-    @players.remove player
+    super player
 
   playerSendInfo: (player) ->
-    player.sendRaw player.makeResponse 'pongInfo', @toJSON player
-
-  _bindPlayerEvents: (player) ->
-    # TODO: Bind joining to lobbies
-    player.on 'disconnect', =>
-      @removePlayer player
+    player.sendRaw player.makeResponse 'serverInfo', @toJSON player
 
   toJSON: (player) ->
     description: @description
-    lobbies: [l.toJSON player for l in @lobbies]
+    lobbies: l.toJSON player for l in @lobbies
     playersNum: @players.length
+
+  _onPlayerLobbyJoin: (player, lobbyName) ->
+    # TODO: What if player is already in another lobby?
+    for l in lobbies
+      if l.name == lobbyname
+        l.addPlayer player

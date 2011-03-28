@@ -1,11 +1,10 @@
 events = require 'events'
 Game = require __dirname + '/game'
 Player = require __dirname + '/player'
+PlayerContainer = require __dirname + '/playercontainer'
 
 module.exports =
-class Lobby extends events.EventEmitter
-  _playerEvents:
-    ['disconnect', 'lobbyLeave', 'lobbyPlayersList', 'gameQuick', 'gameRequest']
+class Lobby extends PlayerContainer
   gameParams:
     fps: 66
     w: 550
@@ -15,18 +14,17 @@ class Lobby extends events.EventEmitter
     @players = []
     @games = []
 
-  joinPlayer: (player) ->
+  addPlayer: (player) ->
     if not @playerPassesTest player
       return false
 
-    @_bindPlayerEvents player
     player.send "lobbyEntered", @toJSON player
     @sendPlayersList player
     for p in @players
       p.send "lobbyPlayerJoined", player
 
     # Update players list at the end
-    @players.push player
+    super player
     console.log "New player joined to " + @name +
                 ". Players: " + (@players.length)
     return true
@@ -40,9 +38,7 @@ class Lobby extends events.EventEmitter
 
     player.send "lobbyLeft", name: @name
     # Update players list at the end
-    #TODO: Unbind player lobby events
-    @_unbindPlayerEvents player
-    @players.remove player
+    super player
     console.log "Player left " + @name + ". Players: " + (@players.length )
 
   sendPlayersList: (player) ->
@@ -67,13 +63,6 @@ class Lobby extends events.EventEmitter
     canJoin: pass
     reason: comment
 
-  _bindPlayerEvents: (player) ->
-    for type in @_playerEvents
-      do (type) =>
-        handler = (args...) =>
-          @['_onPlayer' + type[0].toUpperCase() + type[1..]](player, args...)
-        player.on type, handler
-
   _onPlayerDisconnect: (player) ->
     console.log "Player left"
     @removePlayer player
@@ -83,10 +72,6 @@ class Lobby extends events.EventEmitter
 
   _onPlayerGameQuick: (player, value) ->
       @_playerQuickGame player, value
-
-  _unbindPlayerEvents: (player) ->
-    # player.removeAllListeners 'gameQuick'
-    # player.removeAllListeners ''
 
   _bindGameEvents: (game) ->
     game.on 'gameFinished', =>
