@@ -7,7 +7,8 @@ class Player extends events.EventEmitter
   sendAttrs: ['id', 'name', 'ingame', 'quickGame']
   # Events that are handled and emited when recieved from client
   # This can be augumented to reduce / extend client functions
-  clientEvents: ['pingRequest', 'gameRequest', 'gameQuick', 'playerMove']
+  clientEvents: ['pingRequest', 'gameRequest', 'gameQuick', 'playerMove',
+                 'lobbyJoin']
   # All other events (not including clientEvents)
   # This attribute is used mostely for automatic binding methods to events
   emittedEvents: ['disconnect']
