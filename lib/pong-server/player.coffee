@@ -8,11 +8,13 @@ class Player extends events.EventEmitter
   # Events that are handled and emited when recieved from client
   # This can be augumented to reduce / extend client functions
   clientEvents: ['pingRequest', 'gameRequest', 'gameQuick', 'playerMove']
+  # All other events (not including clientEvents)
+  # This attribute is used mostely for automatic binding methods to events
+  emittedEvents: []
   # - Private static attrs -
   _lastID = 0
-  # NEVER EVER UNCOMMENT THE NEXT LINE
-  # adding _events property silently breaks and twists whole EventEmitter
-  # functionality. BEWARE!
+  # Warning: Never add _events attr like that. Silently breaks whole
+  # EventEmitter functionality
   # _events = ['disconnect']
   constructor: (@connection) ->
     # # connection has to define following interface:
@@ -26,6 +28,9 @@ class Player extends events.EventEmitter
     @_bindEvents()
     @_bindConnection connection
     @sendPlayerData()
+
+  getAllEvents: ->
+    @emittedEvents.concat @clientEvents
 
   send: (type, data) ->
     @connection.send @makeResponse(type, data)
@@ -65,10 +70,9 @@ class Player extends events.EventEmitter
       @emit "disconnect"
 
   _bindEvents: ->
-    for array in [@clientEvents]
-      for name in array
-        handler = @['_on' + name[0].toUpperCase() + name[1..]]
-        @on(name, handler) if handler?
+    for name in @getAllEvents
+      handler = @['_on' + name[0].toUpperCase() + name[1..]]
+      @on(name, handler) if handler?
 
   _onPingRequest: (data) ->
     @send 'pingResponse', data
