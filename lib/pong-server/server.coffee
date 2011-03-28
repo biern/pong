@@ -27,6 +27,6 @@ class Server extends PlayerContainer
 
   _onPlayerLobbyJoin: (player, lobbyName) ->
     # TODO: What if player is already in another lobby?
-    for l in lobbies
-      if l.name == lobbyname
+    for l in @lobbies
+      if l.name == lobbyName
         l.addPlayer player
