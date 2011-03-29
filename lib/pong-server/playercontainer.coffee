@@ -11,8 +11,8 @@ Player = require __dirname + '/player'
 
 module.exports =
 class PlayerContainer extends events.EventEmitter
-  _allPlayerEventsHandlers: []
   constructor: ->
+    @_allPlayerEventsHandlers = []
     @players = []
     @autoFindPlayerHandlers()
 
@@ -24,12 +24,10 @@ class PlayerContainer extends events.EventEmitter
   addPlayer: (player) ->
     @_bindPlayerEvents player
     @players.push player
-    console.log "adding player " + player.id
 
   removePlayer: (player) ->
     @_unbindPlayerEvents player
     @players.remove player
-    console.log "removing player " + player.id
 
   _addPlayerEventHandlers: (pairs) ->
     for pair in pairs
@@ -40,7 +38,9 @@ class PlayerContainer extends events.EventEmitter
     # Switching context and argument (player <-> container)
     # for clearer handlers methods definitions
     @_allPlayerEventsHandlers.push [
-      eventName, (args...) -> handler.call container, this, args...] # 'this' == player
+      # 'this' == player
+      eventName, (args...) -> handler.call container, this, args...]
+
 
   _bindPlayerEvents: (player) ->
     for pair in @_allPlayerEventsHandlers

@@ -11,8 +11,8 @@ class Lobby extends PlayerContainer
     h: 400
 
   constructor: (@name, @description="", @_playerTest=(player)->{pass: true}) ->
-    @players = []
     @games = []
+    super
 
   addPlayer: (player) ->
     if not @playerPassesTest player
@@ -63,15 +63,11 @@ class Lobby extends PlayerContainer
     canJoin: pass
     reason: comment
 
-  _onPlayerDisconnect: (player) ->
-    console.log "Player left"
-    @removePlayer player
-
   _onPlayerLobbyLeave: (player) ->
     @removePlayer player
 
   _onPlayerGameQuick: (player, value) ->
-      @_playerQuickGame player, value
+    @_playerQuickGame player, value
 
   _bindGameEvents: (game) ->
     game.on 'gameFinished', =>
