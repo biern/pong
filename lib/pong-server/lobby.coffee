@@ -18,13 +18,12 @@ class Lobby extends PlayerContainer
     if not @playerPassesTest player
       return false
 
+    super player
     player.send "lobbyEntered", @toJSON player
     @sendPlayersList player
     for p in @players
-      p.send "lobbyPlayerJoined", player
+      (p.send "lobbyPlayerJoined", player) if p != player
 
-    # Update players list at the end
-    super player
     console.log "New player joined to " + @name +
                 ". Players: " + (@players.length)
     return true
@@ -67,32 +66,28 @@ class Lobby extends PlayerContainer
     @removePlayer player
 
   _onPlayerGameQuick: (player, value) ->
-    @_playerQuickGame player, value
-
-  _bindGameEvents: (game) ->
-    game.on 'gameFinished', =>
-      game.players (player) =>
-        player.ingame = false
-        # Debug only - in future change to:
-        # player.quickGame = false
-        player.quickGame = true
-        player.emit 'quickGame'
-        @sendPlayerUpdated player, ['ingame', 'quickGame']
-
-      @games.remove game
-      delete game
-
-  # TODO: unbindGameEvents
-
-  _playerQuickGame: (player, value) ->
     if value
       return
 
     for p in @players
-      if not p.ingame and p.quickGame and p != player
+      if not p.inGame and p.quickGame and p != player
         return @_newGame player, p
 
     @sendPlayerUpdated player, ['quickGame']
+
+  _bindGameEvents: (game) ->
+    game.on 'gameFinished', =>
+      game.players (player) =>
+        player.inGame = false
+        # Debug only - in future change to:
+        # player.quickGame = false
+        player.quickGame = true
+        player.emit 'quickGame'
+        @sendPlayerUpdated player, ['inGame', 'quickGame']
+
+      @games.remove game
+      delete game
+  # TODO: unbindGameEvents
 
   _newGame: (p1, p2) ->
     console.log "New game between " + p1.id + " and " + p2.id
@@ -100,5 +95,5 @@ class Lobby extends PlayerContainer
     @_bindGameEvents game
     @games.push game
     for p in [p1, p2]
-      p.ingame =  true
-      @sendPlayerUpdated p, ['ingame']
+      p.inGame =  true
+      @sendPlayerUpdated p, ['inGame']

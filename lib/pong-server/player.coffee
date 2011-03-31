@@ -4,7 +4,7 @@ module.exports =
 class Player extends events.EventEmitter
   # - Configurable static attrs -
   # Attributes that are sent to client as player info
-  sendAttrs: ['id', 'name', 'ingame', 'quickGame']
+  sendAttrs: ['id', 'name', 'inGame', 'quickGame']
   # Events that are handled and emited when recieved from client
   # This can be augumented to reduce / extend client functions
   clientEvents: ['pingRequest', 'gameRequest', 'gameQuick', 'playerMove',
@@ -24,7 +24,7 @@ class Player extends events.EventEmitter
     @id = (_lastID += 1)
     @name = "anonymous player #" + @id
     console.log "Player: " + @name + " created"
-    @ingame = no
+    @inGame = no
     @quickGame = no
     @_bindEvents()
     @_bindConnection connection
