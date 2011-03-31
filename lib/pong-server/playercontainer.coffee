@@ -39,8 +39,8 @@ class PlayerContainer extends events.EventEmitter
     # for clearer handlers methods definitions
     @_allPlayerEventsHandlers.push [
       # 'this' == player
-      eventName, (args...) -> handler.call container, this, args...]
-
+      eventName, (args...) ->
+        handler.call container, this, args...]
 
   _bindPlayerEvents: (player) ->
     for pair in @_allPlayerEventsHandlers
