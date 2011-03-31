@@ -3,6 +3,8 @@ Game = require __dirname + '/game'
 Player = require __dirname + '/player'
 PlayerContainer = require __dirname + '/playercontainer'
 
+# TODO: lobby ids
+
 module.exports =
 class Lobby extends PlayerContainer
   gameParams:
@@ -14,6 +16,15 @@ class Lobby extends PlayerContainer
     @games = []
     super
 
+  addChatMessage: (player, data) ->
+    if typeof data != 'string'
+      return
+    # TODO: Add utils method for stripping tags
+    data.text = data.text.replace('<', '&lt;');
+    data.text = data.text.replace('>', '&gt;');
+    for p in @players
+      p.send 'lobbyChatMessage', { 'sender': player, 'text': data.text}
+
   addPlayer: (player) ->
     if not @playerPassesTest player
       return false
@@ -22,7 +33,7 @@ class Lobby extends PlayerContainer
     player.send "lobbyEntered", @toJSON player
     @sendPlayersList player
     for p in @players
-      (p.send "lobbyPlayerJoined", player) if p != player
+      (p.send "lobbyPlayerJoined", player: player) if p != player
 
     console.log "New player joined to " + @name +
                 ". Players: " + (@players.length)
@@ -33,7 +44,7 @@ class Lobby extends PlayerContainer
 
   removePlayer: (player) ->
     for p, i in @players
-      p.send "lobbyPlayerLeft", player
+      p.send "lobbyPlayerLeft", player: player
 
     player.send "lobbyLeft", name: @name
     # Update players list at the end
@@ -64,6 +75,9 @@ class Lobby extends PlayerContainer
 
   _onPlayerLobbyLeave: (player) ->
     @removePlayer player
+
+  _onPlayerLobbyChatMessage: (player, data) ->
+    @addChatMessage player, data
 
   _onPlayerGameQuick: (player, value) ->
     if value
