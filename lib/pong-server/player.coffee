@@ -8,7 +8,7 @@ class Player extends events.EventEmitter
   # Events that are handled and emited when recieved from client
   # This can be augumented to reduce / extend client functions
   clientEvents: ['pingRequest', 'gameRequest', 'gameQuick', 'playerMove',
-                 'lobbyJoin']
+                 'lobbyJoin', 'lobbyLeave']
   # All other events (not including clientEvents)
   # This attribute is used mostely for automatic binding methods to events
   emittedEvents: ['disconnect']
@@ -34,6 +34,7 @@ class Player extends events.EventEmitter
     @emittedEvents.concat @clientEvents
 
   send: (type, data) ->
+    # console.log @id + ' sending ' + type
     @connection.send @makeResponse(type, data)
 
   sendMessage: (msg) ->
@@ -62,6 +63,9 @@ class Player extends events.EventEmitter
       catch error
         return
 
+      # if type != 'pingRequest'
+      #     console.log @id + ' recieving ' + type
+
       if type in @clientEvents
         @emit type, data
       else
@@ -71,7 +75,7 @@ class Player extends events.EventEmitter
       @emit "disconnect"
 
   _bindEvents: ->
-    for name in @getAllEvents
+    for name in @getAllEvents()
       handler = @['_on' + name[0].toUpperCase() + name[1..]]
       @on(name, handler) if handler?
 
