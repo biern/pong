@@ -8,7 +8,7 @@ class Player extends events.EventEmitter
   # Events that are handled and emited when recieved from client
   # This can be augumented to reduce / extend client functions
   clientEvents: ['pingRequest', 'gameRequest', 'gameQuick', 'playerMove',
-                 'lobbyJoin', 'lobbyLeave']
+                 'lobbyJoin', 'lobbyLeave', 'lobbyChatMessage']
   # All other events (not including clientEvents)
   # This attribute is used mostely for automatic binding methods to events
   emittedEvents: ['disconnect']
@@ -22,7 +22,7 @@ class Player extends events.EventEmitter
     # # .on( ('message|disconnect'), callback)
     # # .send(data)
     @id = (_lastID += 1)
-    @name = "anonymous player #" + @id
+    @name = "player #" + @id
     console.log "Player: " + @name + " created"
     @inGame = no
     @quickGame = no
