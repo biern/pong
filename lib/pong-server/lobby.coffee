@@ -23,6 +23,10 @@ class Lobby extends PlayerContainer
     # TODO: Add utils method for stripping tags
     data.text = data.text.replace /</g, '&lt;'
     data.text = data.text.replace />/g, '&gt;'
+    # Dont send empty messages
+    if not data.text.length
+      return
+
     for p in @players
       p.send 'lobbyChatMessage', { 'player': player, 'text': data.text}
 
