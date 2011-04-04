@@ -17,13 +17,14 @@ class Lobby extends PlayerContainer
     super
 
   addChatMessage: (player, data) ->
-    if typeof data != 'string'
+    if typeof data.text != 'string'
       return
+
     # TODO: Add utils method for stripping tags
-    data.text = data.text.replace('<', '&lt;');
-    data.text = data.text.replace('>', '&gt;');
+    data.text = data.text.replace /</g, '&lt;'
+    data.text = data.text.replace />/g, '&gt;'
     for p in @players
-      p.send 'lobbyChatMessage', { 'sender': player, 'text': data.text}
+      p.send 'lobbyChatMessage', { 'player': player, 'text': data.text}
 
   addPlayer: (player) ->
     if not @playerPassesTest player
