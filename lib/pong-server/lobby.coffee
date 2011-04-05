@@ -9,7 +9,7 @@ module.exports =
 class Lobby extends PlayerContainer
   gameParams:
     fps: 66
-    w: 550
+    w: 400
     h: 400
 
   constructor: (@name, @description="", @_playerTest=(player)->{pass: true}) ->
@@ -84,13 +84,11 @@ class Lobby extends PlayerContainer
   _onPlayerLobbyChatMessage: (player, data) ->
     @addChatMessage player, data
 
-  _onPlayerGameQuick: (player, value) ->
-    if value
-      return
-
-    for p in @players
-      if not p.inGame and p.quickGame and p != player
-        return @_newGame player, p
+  _onPlayerGameQuick: (player, data) ->
+    if data.value
+      for p in @players
+        if not p.inGame and p.quickGame and p != player
+          return @_newGame player, p
 
     @sendPlayerUpdated player, ['quickGame']
 

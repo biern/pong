@@ -82,5 +82,5 @@ class Player extends events.EventEmitter
   _onPingRequest: (data) ->
     @send 'pingResponse', data
 
-  _onGameQuick: (value=true) ->
-    @quickGame = value
+  _onGameQuick: (data={value: true}) ->
+    @quickGame = data.value
