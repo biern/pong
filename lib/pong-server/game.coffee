@@ -32,7 +32,7 @@ class Game extends events.EventEmitter
   _initBoard: ->
     @board = new Board(@data, @player1, @player2)
     @players (player) =>
-      player.send 'gameSimulationData', board: @data
+      player.send 'gameBoard', @board
 
     @board.on 'score', (playerScored) =>
       score = (@points[playerScored.id] += 1)

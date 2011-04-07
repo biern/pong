@@ -60,6 +60,9 @@ class Board extends events.EventEmitter
     paddles: @paddles
     timestamp: (new Date).getTime()
 
+  toJSON: ->
+    { @w, @h, @fps, @interval }
+
   _newID: ->
     (@_lastID += 1)
 
