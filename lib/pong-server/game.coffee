@@ -21,7 +21,7 @@ class Game extends events.EventEmitter
       if @finished
         return
 
-      response = Player::makeResponse 'snapshot', @board.getSnapshot()
+      response = Player::makeResponse 'gameSnapshot', @board.getSnapshot()
       @players (player) =>
         player.sendRaw response
 
@@ -32,7 +32,7 @@ class Game extends events.EventEmitter
   _initBoard: ->
     @board = new Board(@data, @player1, @player2)
     @players (player) =>
-      player.send 'gameBoard', @board
+      player.send 'gameBoardInfo', @board
 
     @board.on 'score', (playerScored) =>
       score = (@points[playerScored.id] += 1)

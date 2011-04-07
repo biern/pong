@@ -28,7 +28,7 @@ class Player extends events.EventEmitter
     @quickGame = no
     @_bindEvents()
     @_bindConnection connection
-    @sendPlayerData()
+    @sendPlayerInfo()
 
   getAllEvents: ->
     @emittedEvents.concat @clientEvents
@@ -53,8 +53,8 @@ class Player extends events.EventEmitter
 
     result
 
-  sendPlayerData: ->
-    @send 'playerData', this
+  sendPlayerInfo: ->
+    @send 'playerInfo', this
 
   _bindConnection: (connection) ->
     connection.on "message", (rawData) =>
