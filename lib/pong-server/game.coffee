@@ -59,6 +59,8 @@ class Game extends events.EventEmitter
     @emit 'gameFinished'
 
   _start: ->
+    @players (player) =>
+      player.send 'gameStarted'
     @_initBoard()
     @_initSnapshotSender()
     @board.start()
