@@ -7,6 +7,7 @@ PlayerContainer = require __dirname + '/playercontainer'
 
 module.exports =
 class Lobby extends PlayerContainer
+  _lastID = 0
   gameParams:
     fps: 66
     w: 400
@@ -14,6 +15,7 @@ class Lobby extends PlayerContainer
 
   constructor: (@name, @description="", @_playerTest=(player)->{pass: true}) ->
     @games = []
+    @id = (_lastID += 1)
     super
 
   addChatMessage: (player, data) ->
@@ -72,6 +74,7 @@ class Lobby extends PlayerContainer
 
   toJSON: (player=null) ->
     { pass, comment } = @playerPassesTest player
+    id: @id
     playersNum: @players.length
     gameParams: @gameParams
     name: @name
@@ -108,9 +111,10 @@ class Lobby extends PlayerContainer
 
   _newGame: (p1, p2) ->
     console.log "New game between " + p1.id + " and " + p2.id
-    game = new Game(@gameParams, p1, p2)
-    @_bindGameEvents game
-    @games.push game
-    for p in [p1, p2]
-      p.inGame =  true
-      @sendPlayerUpdated p, ['inGame']
+
+    # game = new Game(@gameParams, p1, p2)
+    # @_bindGameEvents game
+    # @games.push game
+    # for p in [p1, p2]
+    #   p.inGame =  true
+    #   @sendPlayerUpdated p, ['inGame']
