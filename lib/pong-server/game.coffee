@@ -2,10 +2,12 @@ events = require 'events'
 Board = require __dirname + '/board'
 Player = require __dirname + '/player'
 
-# TODO: Redesign simulationData, board data format
-
 module.exports =
 class Game extends events.EventEmitter
+  # Events:
+  # Emitted to host: 'gameCreated', 'gameFinished'
+  # (first argument is always a Game instance.
+  # Sent to players: 'gameSnapshot', 'gameBoardInfo', 'gameScore', 'gameFinished'
   newRoundTimeout: 3000
   snapshotInterval: 400
   finished = no
@@ -14,6 +16,7 @@ class Game extends events.EventEmitter
     @points = {}
     @points[@player1.id] = 0
     @points[@player2.id] = 0
+    @host.emit 'gameCreated', this
     @_start()
 
   _initSnapshotSender: ->
