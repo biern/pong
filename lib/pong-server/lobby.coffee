@@ -110,10 +110,11 @@ class Lobby extends PlayerContainer
 
   _newGame: (p1, p2) ->
     console.log "New game between " + p1.id + " and " + p2.id
-    @host.send 'newGame', @gameParams, p1, p2
+    @host.emit 'newGame', @gameParams, p1, p2
 
     # game = new Game(@gameParams, p1, p2)
-  plugTo: (host) ->
+  plugTo: (@host) ->
+    host.emit 'lobbyPlugged', this
     #TODO: Make these separate methods
     host.on 'playerJoined', (player) =>
       player.on 'lobbyJoin', (lobbyID) =>

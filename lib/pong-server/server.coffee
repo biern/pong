@@ -5,14 +5,20 @@ module.exports =
 class Server extends PlayerContainer
   constructor: (@description) ->
     @lobbies = []
+    @_bind()
     super
 
-  addLobby: (lobby) ->
+  _bind: ->
+    @on 'lobbyPlugged', (lobby) =>
+      @_addLobby lobby
+
+  _addLobby: (lobby) ->
     @lobbies.push lobby
 
   addPlayer: (player) ->
     super player
     @playerSendInfo player
+    @emit 'playerJoined', player
 
   removePlayer: (player) ->
     super player
@@ -24,9 +30,3 @@ class Server extends PlayerContainer
     description: @description
     lobbies: l.toJSON player for l in @lobbies
     playersNum: @players.length
-
-  _onPlayerLobbyJoin: (player, lobbyName) ->
-    # TODO: What if player is already in another lobby?
-    for l in @lobbies
-      if l.name == lobbyName
-        l.addPlayer player
