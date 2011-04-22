@@ -9,7 +9,7 @@ class Game extends events.EventEmitter
   newRoundTimeout: 3000
   snapshotInterval: 400
   finished = no
-  constructor: (@data, @player1, @player2) ->
+  constructor: (@host, @data, @player1, @player2) ->
     @data.interval = 1000 / @data.fps
     @points = {}
     @points[@player1.id] = 0
@@ -56,7 +56,7 @@ class Game extends events.EventEmitter
   _gameFinished: ->
     @finished = yes
     @board.stop()
-    @emit 'gameFinished'
+    @host.emit 'gameFinished', this
 
   _start: ->
     @players (player) =>
@@ -69,3 +69,7 @@ class Game extends events.EventEmitter
   players: (func) ->
     func.call this, @player1, @player2, 0
     func.call this, @player2, @player1, 1
+
+  @plugTo: (host) ->
+    host.on 'newGame', (data, player1, player2) =>
+      game = new Game host, data, player1, player2
