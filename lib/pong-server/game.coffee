@@ -2,19 +2,24 @@ events = require 'events'
 Board = require __dirname + '/board'
 Player = require __dirname + '/player'
 
-# TODO: Redesign simulationData, board data format
 
 module.exports =
 class Game extends events.EventEmitter
   newRoundTimeout: 3000
   snapshotInterval: 400
-  finished = no
+  finished: no
   constructor: (@data, @player1, @player2) ->
     @data.interval = 1000 / @data.fps
     @points = {}
     @points[@player1.id] = 0
     @points[@player2.id] = 0
-    @_start()
+    @_bind()
+
+  _bind: ->
+    @players (player1, player2) =>
+      player1.on 'disconnect', =>
+        @_gameFinished player2, 'quit'
+
 
   _initSnapshotSender: ->
     sender = =>
@@ -49,6 +54,9 @@ class Game extends events.EventEmitter
         @_newRound()
 
   _gameFinished: (winner) ->
+    if @finished
+      return
+
     @finished = yes
     @players (player) =>
       player.send 'gameFinished',
