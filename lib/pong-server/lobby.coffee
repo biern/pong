@@ -97,7 +97,7 @@ class Lobby extends PlayerContainer
 
   _bindGameEvents: (game) ->
     game.on 'gameFinished', =>
-      game.players (player) =>
+      game.playersCall (player) =>
         player.inGame = false
         # Debug only - in future change to:
         # player.quickGame = false
