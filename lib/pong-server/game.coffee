@@ -10,7 +10,7 @@ class Game extends events.EventEmitter
   # Sent to players: 'gameSnapshot', 'gameBoardInfo', 'gameScore', 'gameFinished'
   newRoundTimeout: 3000
   snapshotInterval: 400
-  finished = no
+  finished: no
   constructor: (@host, @data, @player1, @player2) ->
     @data.interval = 1000 / @data.fps
     @points = {}
@@ -18,6 +18,12 @@ class Game extends events.EventEmitter
     @points[@player2.id] = 0
     @host.emit 'gameCreated', this
     @_start()
+    @_bind()
+
+  _bind: ->
+    @players (player1, player2) =>
+      player1.on 'disconnect', =>
+        @_gameFinished player2, 'quit'
 
   _initSnapshotSender: ->
     sender = =>
@@ -40,24 +46,27 @@ class Game extends events.EventEmitter
     @board.on 'score', (playerScored) =>
       score = (@points[playerScored.id] += 1)
       scores = [@points[@player1.id], @points[@player2.id]]
-      if score >= 3
-        @_gameFinished()
-      else
-        @board.newRound(@newRoundTimeout)
-
       @players (player) =>
         player.send 'gameScore',
           scores: scores,
           player: playerScored,
           self: player == playerScored,
 
-        if @finished
-          player.send 'gameFinished',
-            winner: playerScored,
-            won: playerScored == player
+      if score >= 3
+        @_gameFinished playerScored
+      else
+        @_newRound()
 
-  _gameFinished: ->
+  _gameFinished: (winner) ->
+    if @finished
+      return
+
     @finished = yes
+    @players (player) =>
+      player.send 'gameFinished',
+      winner: winner,
+      won: winner == player
+
     @board.stop()
     @host.emit 'gameFinished', this
 
@@ -67,7 +76,10 @@ class Game extends events.EventEmitter
     @_initBoard()
     @_initSnapshotSender()
     @board.start()
-    @board.newRound(@newRoundTimeout)
+    @_newRound()
+
+  _newRound: ->
+    @board.newRound @newRoundTimeout
 
   players: (func) ->
     func.call this, @player1, @player2, 0
