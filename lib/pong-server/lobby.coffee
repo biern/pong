@@ -96,14 +96,15 @@ class Lobby extends PlayerContainer
     @sendPlayerUpdated player, ['quickGame']
 
   _bindGameEvents: (game) ->
-    game.on 'gameFinished', =>
+    game.on 'gameFinished', (data) =>
       game.playersCall (player) =>
-        player.inGame = false
-        # Debug only - in future change to:
-        # player.quickGame = false
-        player.quickGame = true
-        player.emit 'quickGame'
-        @sendPlayerUpdated player, ['inGame', 'quickGame']
+        if player == data.winner
+          player.inGame = false
+          # Debug only - in future change to:
+          # player.quickGame = false
+          player.quickGame = true
+          player.emit 'quickGame'
+          @sendPlayerUpdated player, ['inGame', 'quickGame']
 
       @games.remove game
       delete game

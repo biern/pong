@@ -73,7 +73,6 @@ class Game extends PlayerContainer
 
     @board.stop()
     @emit 'gameFinished',
-      this,
         winner: winner
         reason: reason
 
