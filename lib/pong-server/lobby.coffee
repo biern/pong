@@ -111,10 +111,9 @@ class Lobby extends PlayerContainer
 
   _newGame: (p1, p2) ->
     console.log "New game between " + p1.id + " and " + p2.id
-
-    # game = new Game(@gameParams, p1, p2)
-    # @_bindGameEvents game
-    # @games.push game
-    # for p in [p1, p2]
-    #   p.inGame =  true
-    #   @sendPlayerUpdated p, ['inGame']
+    game = new Game(@gameParams, p1, p2)
+    @_bindGameEvents game
+    @games.push game
+    for p in [p1, p2]
+      p.inGame =  true
+      @sendPlayerUpdated p, ['inGame']

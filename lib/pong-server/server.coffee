@@ -25,8 +25,8 @@ class Server extends PlayerContainer
     lobbies: l.toJSON player for l in @lobbies
     playersNum: @players.length
 
-  _onPlayerLobbyJoin: (player, lobbyName) ->
+  _onPlayerLobbyJoin: (player, lobbyID) ->
     # TODO: What if player is already in another lobby?
     for l in @lobbies
-      if l.name == lobbyName
+      if l.id == lobbyID
         l.addPlayer player
