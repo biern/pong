@@ -72,9 +72,10 @@ class Game extends PlayerContainer
         reason: reason
 
     @board.stop()
-    @host.emit 'gameFinished', this
-      winner: winner
-      reason: reason
+    @emit 'gameFinished',
+      this,
+        winner: winner
+        reason: reason
 
   _start: ->
     @playersCall (player) =>
