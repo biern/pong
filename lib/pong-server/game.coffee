@@ -1,29 +1,32 @@
 events = require 'events'
 Board = require __dirname + '/board'
 Player = require __dirname + '/player'
+PlayerContainer = require __dirname + '/playercontainer'
 
+# Game Class
+# Implements higher level game logic - creation,
+# waiting for players, starting and finishing.
+# All game rules related logic is handled by Board class.
 module.exports =
-class Game extends events.EventEmitter
-  # Events:
-  # Emitted to host: 'gameCreated', 'gameFinished'
-  # (first argument is always a Game instance.
-  # Sent to players: 'gameSnapshot', 'gameBoardInfo', 'gameScore', 'gameFinished'
+class Game extends PlayerContainer
   newRoundTimeout: 3000
   snapshotInterval: 400
   finished: no
   constructor: (@host, @data, @player1, @player2) ->
+    super
     @data.interval = 1000 / @data.fps
     @points = {}
     @points[@player1.id] = 0
     @points[@player2.id] = 0
     @host.emit 'gameCreated', this
+    @addPlayer player1
+    @addPlayer player2
     @_start()
-    @_bind()
 
-  _bind: ->
-    @players (player1, player2) =>
-      player1.on 'disconnect', =>
-        @_gameFinished player2, 'quit'
+  _onPlayerDisconnect: (player) ->
+    winner = if @player1 == player then @player2 else @player1
+    @_gameFinished winner, 'quit'
+    super player
 
   _initSnapshotSender: ->
     sender = =>
@@ -31,7 +34,7 @@ class Game extends events.EventEmitter
         return
 
       response = Player::makeResponse 'gameSnapshot', @board.getSnapshot()
-      @players (player) =>
+      @playersCall (player) =>
         player.sendRaw response
 
       setTimeout (=> sender()), @snapshotInterval
@@ -40,13 +43,13 @@ class Game extends events.EventEmitter
 
   _initBoard: ->
     @board = new Board(@data, @player1, @player2)
-    @players (player) =>
+    @playersCall (player) =>
       player.send 'gameBoardInfo', @board
 
     @board.on 'score', (playerScored) =>
       score = (@points[playerScored.id] += 1)
       scores = [@points[@player1.id], @points[@player2.id]]
-      @players (player) =>
+      @playersCall (player) =>
         player.send 'gameScore',
           scores: scores,
           player: playerScored,
@@ -57,21 +60,24 @@ class Game extends events.EventEmitter
       else
         @_newRound()
 
-  _gameFinished: (winner) ->
+  _gameFinished: (winner, reason) ->
     if @finished
       return
 
     @finished = yes
-    @players (player) =>
+    @playersCall (player) =>
       player.send 'gameFinished',
-      winner: winner,
-      won: winner == player
+        winner: winner
+        won: winner == player
+        reason: reason
 
     @board.stop()
     @host.emit 'gameFinished', this
+      winner: winner
+      reason: reason
 
   _start: ->
-    @players (player) =>
+    @playersCall (player) =>
       player.send 'gameStarted'
     @_initBoard()
     @_initSnapshotSender()
@@ -81,7 +87,7 @@ class Game extends events.EventEmitter
   _newRound: ->
     @board.newRound @newRoundTimeout
 
-  players: (func) ->
+  playersCall: (func) ->
     func.call this, @player1, @player2, 0
     func.call this, @player2, @player1, 1
 

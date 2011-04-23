@@ -97,7 +97,7 @@ class Lobby extends PlayerContainer
 
   _bindGameEvents: (game) ->
     game.on 'gameFinished', =>
-      game.players (player) =>
+      game.playersCall (player) =>
         player.inGame = false
         # Debug only - in future change to:
         # player.quickGame = false
@@ -112,7 +112,6 @@ class Lobby extends PlayerContainer
     console.log "New game between " + p1.id + " and " + p2.id
     @host.emit 'newGame', @gameParams, p1, p2
 
-    # game = new Game(@gameParams, p1, p2)
   plugTo: (@host) ->
     host.emit 'lobbyPlugged', this
     #TODO: Make these separate methods
@@ -124,7 +123,7 @@ class Lobby extends PlayerContainer
     host.on 'gameCreated', (game) =>
       @_bindGameEvents game
       @games.push game
-      game.players (player)=>
+      game.playersCall (player)=>
         player.inGame = true
         @sendPlayerUpdated player, ['inGame']
 
