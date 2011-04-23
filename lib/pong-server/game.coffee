@@ -23,11 +23,8 @@ class Game extends PlayerContainer
     @addPlayer player2
     @_start()
 
-  _onPlayerDisconnect: (player) ->
-    winner = if @player1 == player then @player2 else @player1
-    @_gameFinished winner, 'quit'
-    super player
-
+  # - initialization -
+  # TODO: Move to board
   _initSnapshotSender: ->
     sender = =>
       if @finished
@@ -41,6 +38,7 @@ class Game extends PlayerContainer
 
     sender()
 
+  # Create board (game simulation) and bind it
   _initBoard: ->
     @board = new Board(@data, @player1, @player2)
     @playersCall (player) =>
@@ -56,11 +54,31 @@ class Game extends PlayerContainer
           self: player == playerScored,
 
       if score >= 3
-        @_gameFinished playerScored
+        @_finish playerScored
       else
         @_newRound()
 
-  _gameFinished: (winner, reason) ->
+  # - Player events -
+  # Finish game when player disconnects
+  _onPlayerDisconnect: (player) ->
+    winner = if @player1 == player then @player2 else @player1
+    @_finish winner, 'quit'
+    super player
+
+  # - Game logic -
+  _start: ->
+    @playersCall (player) =>
+      player.send 'gameStarted'
+    @_initBoard()
+    @_initSnapshotSender()
+    @board.start()
+    @_newRound()
+
+  _newRound: ->
+    @board.newRound @newRoundTimeout
+
+  _finish: (winner, reason) ->
+    # Game can be finished only once :-)
     if @finished
       return
 
@@ -76,21 +94,12 @@ class Game extends PlayerContainer
         winner: winner
         reason: reason
 
-  _start: ->
-    @playersCall (player) =>
-      player.send 'gameStarted'
-    @_initBoard()
-    @_initSnapshotSender()
-    @board.start()
-    @_newRound()
-
-  _newRound: ->
-    @board.newRound @newRoundTimeout
-
+  # - Other / helpers -
   playersCall: (func) ->
     func.call this, @player1, @player2, 0
     func.call this, @player2, @player1, 1
 
+  # - Static -
   @plugTo: (host) ->
     host.on 'newGame', (data, player1, player2) =>
       game = new Game host, data, player1, player2
