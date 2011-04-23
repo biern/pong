@@ -12,12 +12,13 @@ class Game extends PlayerContainer
   newRoundTimeout: 3000
   snapshotInterval: 400
   finished: no
-  constructor: (@data, @player1, @player2) ->
+  constructor: (@host, @data, @player1, @player2) ->
     super
     @data.interval = 1000 / @data.fps
     @points = {}
     @points[@player1.id] = 0
     @points[@player2.id] = 0
+    @host.emit 'gameCreated', this
     @addPlayer player1
     @addPlayer player2
     @_start()
@@ -72,8 +73,9 @@ class Game extends PlayerContainer
 
     @board.stop()
     @emit 'gameFinished',
-      winner: winner
-      reason: reason
+      this,
+        winner: winner
+        reason: reason
 
   _start: ->
     @playersCall (player) =>
@@ -89,3 +91,7 @@ class Game extends PlayerContainer
   playersCall: (func) ->
     func.call this, @player1, @player2, 0
     func.call this, @player2, @player1, 1
+
+  @plugTo: (host) ->
+    host.on 'newGame', (data, player1, player2) =>
+      game = new Game host, data, player1, player2

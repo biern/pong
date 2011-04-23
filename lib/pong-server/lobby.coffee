@@ -107,13 +107,24 @@ class Lobby extends PlayerContainer
 
       @games.remove game
       delete game
-  # TODO: unbindGameEvents
 
   _newGame: (p1, p2) ->
     console.log "New game between " + p1.id + " and " + p2.id
-    game = new Game(@gameParams, p1, p2)
-    @_bindGameEvents game
-    @games.push game
-    for p in [p1, p2]
-      p.inGame =  true
-      @sendPlayerUpdated p, ['inGame']
+    @host.emit 'newGame', @gameParams, p1, p2
+
+  plugTo: (@host) ->
+    host.emit 'lobbyPlugged', this
+    #TODO: Make these separate methods
+    host.on 'playerJoined', (player) =>
+      player.on 'lobbyJoin', (lobbyID) =>
+        if lobbyID == @id
+          @addPlayer player
+
+    host.on 'gameCreated', (game) =>
+      @_bindGameEvents game
+      @games.push game
+      game.playersCall (player)=>
+        player.inGame = true
+        @sendPlayerUpdated player, ['inGame']
+
+    # TODO: on gameFinished
